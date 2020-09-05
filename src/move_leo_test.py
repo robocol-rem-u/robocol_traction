@@ -10,7 +10,6 @@ from geometry_msgs.msg import Twist, TwistStamped,PoseWithCovariance,Pose
 #from leo_control_auto.msg import Obstacle
 from std_msgs.msg import Int32
 
-
 class MoveLeo(object):
 	def __init__(self):
 		super(MoveLeo, self).__init__()
@@ -119,6 +118,7 @@ class MoveLeo(object):
 							alpha = angulo - self.theta
 						self.girar(alpha)
 						print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
+
 
 					msg = Twist()
 					msg.linear.x = 0.0
