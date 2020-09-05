@@ -448,10 +448,10 @@ class Ruta:
         #return response
 
     def callbackPath(self, param):
-        print('aaaa')
-        # for i in range(len(param.poses)):
-        #     self.points.append(param.poses[i].pose)
-        # self.navegacion()
+        #print('aaaa')
+        for i in range(len(param.poses)):
+            self.points.append(param.poses[i].pose)
+        self.navegacion()
             
         #print(param.poses[0].pose)
             
