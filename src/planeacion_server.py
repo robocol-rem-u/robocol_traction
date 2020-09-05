@@ -373,14 +373,14 @@ class Ruta:
         relacionX = float(40.0 / alto)
         relacionY = float(30.0 / ancho)
 
-        rospy.loginfo('Nodo inicio vrep "{}"'.format(self.points[0].position))
-        rospy.loginfo('Nodo destino vrep "{}"'.format(self.points[-1].position))
+        rospy.loginfo('Nodo inicio vrep "{}"'.format(self.points[0]))
+        rospy.loginfo('Nodo destino vrep "{}"'.format(self.points[3]))
 
         rospy.loginfo('Parametros metodo ancho:"{}"'.format(ancho))
         rospy.loginfo('Parametros metodo alto:"{}"'.format(alto))
 
-        self.inicio = (int((self.points[0].position.x + 20.0) / relacionX), int((self.points[0].position.y + 15.0) / relacionY))
-        self.final = (int((self.points[-1].position.x + 20.0) / relacionX), int((self.points[-1].position.y + 15.0) / relacionY))
+        self.inicio = (int((self.points[0] + 20.0) / relacionX), int((self.points[1] + 15.0) / relacionY))
+        self.final = (int((self.points[3] + 20.0) / relacionX), int((self.points[4] + 15.0) / relacionY))
         rospy.loginfo('Nodo inicio "{}"'.format(self.inicio))
         rospy.loginfo('Nodo destino "{}"'.format(self.final))
 
@@ -450,8 +450,7 @@ class Ruta:
 
     def callbackPath(self, param):
         #print('aaaa')
-        for i in range(len(param.poses)):
-            self.points.append(param.poses[i].pose)
+        self.points = param.data
         self.navegacion()
             
         #print(param.poses[0].pose)

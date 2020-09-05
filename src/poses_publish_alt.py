@@ -11,8 +11,8 @@ from std_msgs.msg import Float32MultiArray
 class Poses(object):
 	def __init__(self):
 		super(Poses, self).__init__()
-		self.ini_pose = [0.1,0.0,0.0]
-		self.end_pose = [0.2,0.2,0.0]
+		self.ini_pose = [0.0,0.0,0.0]
+		self.end_pose = [0.0,5.0,0.0]
 		
 		print('Init node...')
 		rospy.init_node('poses_node', anonymous=True)
