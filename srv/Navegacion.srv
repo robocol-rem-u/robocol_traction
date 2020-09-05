@@ -1,0 +1,6 @@
+string metodo
+float64[] inicio
+float64[] destino
+---
+float64[] rutax
+float64[] rutay

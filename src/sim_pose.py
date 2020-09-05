@@ -31,7 +31,7 @@ class Pose(object):
 		msj.pose.pose.orientation.z = param.pose[1].orientation.z
 		msj.pose.pose.orientation.w = param.pose[1].orientation.w
 
-		print('{}\r'.format(msj.pose.pose.position.x), end="")
+		print('x: {}, y: {}\r'.format(round(msj.pose.pose.position.x,3),round(msj.pose.pose.position.y,3)), end="")
 
 		self.pub.publish(msj)
 		#print(param.pose[1])
