@@ -14,9 +14,11 @@ class Poses(object):
 		self.ini_pose = [0.1,0.0,0.0]
 		self.end_pose = [0.2,0.2,0.0]
 		
+		print('Init node...')
+		rospy.init_node('poses_node', anonymous=True)
+		self.pubPose = rospy.Publisher('/robocol/inicio_destino',Float32MultiArray,queue_size=1)
 		
-	def path_msg(self):
-
+	def pub(self):
 		path = []
 		path.append(self.ini_pose)
 		path.append(self.end_pose)
@@ -37,8 +39,11 @@ class Poses(object):
 		# # path.poses.header = Header()
 		# path.poses.append(ini)
 		# # path.poses[0].pose.position.x = 2
-		print(path)
-		return path
+		msg = Float32MultiArray()
+		msg.data = path 
+		print(msg)
+		# pose_msg = poses.path_msg()
+		self.pubPose.publish(msg)
 
 
 		# # Init pose
@@ -70,18 +75,14 @@ class Poses(object):
 
 def main():
 	try:
-		print('Init node...')
-		rospy.init_node('poses_node', anonymous=True)
-		pubPose = rospy.Publisher('/robocol/inicio_destino',Path,queue_size=1)
-		poses = Poses()
-		pub = True
-		time.sleep(1)
-		print('Publishing poses...')
+		obj = Poses()
+		# pub = True
+		# time.sleep(1)
+		# print('Publishing poses...')
 		rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
 			#if pub:
-			pose_msg = poses.path_msg()
-			pubPose.publish(pose_msg)
+			obj.pub()
 		#	pub = False
 			rate.sleep()
 	except rospy.ROSInterruptException:
