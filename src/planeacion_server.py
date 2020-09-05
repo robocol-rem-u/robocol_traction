@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from robocol_traction.srv import Navegacion, NavegacionResponse, GridmapPoints
 from nav_msgs.msg import Path
 from PIL import Image, ImageDraw
+from std_msgs.msg import Float32MultiArray
 
 """
 metodos usados en la clase minheap 
@@ -459,7 +460,7 @@ class Ruta:
 def main():
     rospy.init_node('navegacion', anonymous=True)
     ruta = Ruta()
-    rospy.Subscriber('/robocol/inicio_destino', Path, ruta.callbackPath)
+    rospy.Subscriber('/robocol/inicio_destino', Float32MultiArray, ruta.callbackPath)
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():

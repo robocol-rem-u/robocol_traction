@@ -17,21 +17,10 @@ class Poses(object):
 		
 	def path_msg(self):
 
-		path = Path()
-		path.header = Header()
-		pose = PoseStamped()
-		pose.header = Header()
-		ini = Pose()
-		ini.position.x = self.ini_pose[0]
-		ini.position.y = self.ini_pose[1]
-		ini.position.z = self.ini_pose[2]
-		end = Pose()
-		end.position.x = self.end_pose[0]
-		end.position.y = self.end_pose[1]
-		end.position.z = self.end_pose[2]
-		# pose.pose = ini
-		pose = [ini,end]
-		path.poses = pose
+		path = []
+		path.append(self.ini_pose)
+		path.append(self.end_pose)
+		
 		#print(path)
 		# path.poses.append(pose)
 		# pose.pose = end
