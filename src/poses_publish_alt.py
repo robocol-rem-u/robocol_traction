@@ -4,7 +4,6 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Header
-from geometry_msgs.msg import Point
 import time
 from std_msgs.msg import Float32MultiArray
 	
@@ -18,27 +17,10 @@ class Poses(object):
 		
 	def path_msg(self):
 
-		path = Path()
-		path.header = Header()
-		path.header.frame_id = 'Test'
-		poseStamped = PoseStamped()
-		poseStamped.header = Header()
-		poseStamped.header.frame_id = 'Test'
+		path = []
+		path.append(self.ini_pose)
+		path.append(self.end_pose)
 		
-		ini = Pose()
-		ini.position = Point(0.0,0.0,0.0)
-		end = Pose()
-		end.position = Point(0.0,0.0,0.0)
-		
-		poseStamped = [ini,end]
-		path.poses = poseStamped
-		print(path)
-		end.position.x = self.end_pose[0]
-		end.position.y = self.end_pose[1]
-		end.position.z = self.end_pose[2]
-		# pose.pose = ini
-		pose = [ini,end]
-		path.poses = pose
 		#print(path)
 		# path.poses.append(pose)
 		# pose.pose = end
@@ -55,7 +37,7 @@ class Poses(object):
 		# # path.poses.header = Header()
 		# path.poses.append(ini)
 		# # path.poses[0].pose.position.x = 2
-		# print(path)
+		print(path)
 		return path
 
 
