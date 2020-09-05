@@ -96,12 +96,13 @@ class Ruta:
 
     def __init__(self):
         self.ruta_imagen = './src/robocol_traction/map/ERC_map.pgm'  # ruta de la imagen
-        self.ruta_resultados = './src/proyecto_final_3/results/'
+        self.ruta_resultados = './src/robocol_traction/results/'
         self.ruta = []  # ruta optima
         self.inicio = None  # nodo inicio
         self.final = None  # nodo final
         self.grafo = None  # grafo de exploracion
         self.heuristica = 'm'
+        self.points = []
 
     def euclidiana(self, nodo):
         """
@@ -366,27 +367,25 @@ class Ruta:
                                      save_all=True,
                                      duration=50, loop=0)
 
-    def vrep_to_gridmap(self, start, end, ancho, alto):
+    def vrep_to_gridmap(self, ancho, alto):
 
         relacionX = float(40.0 / alto)
         relacionY = float(30.0 / ancho)
 
-        rospy.loginfo('Nodo inicio vrep "{}"'.format(start))
-        rospy.loginfo('Nodo destino vrep "{}"'.format(end))
+        rospy.loginfo('Nodo inicio vrep "{}"'.format(self.points[0].position))
+        rospy.loginfo('Nodo destino vrep "{}"'.format(self.points[-1].position))
 
         rospy.loginfo('Parametros metodo ancho:"{}"'.format(ancho))
         rospy.loginfo('Parametros metodo alto:"{}"'.format(alto))
 
-        self.inicio = (int((start[0] + 20.0) / relacionX), int((start[1] + 15.0) / relacionY))
-        self.final = (int((end[0] + 20.0) / relacionX), int((end[1] + 15.0) / relacionY))
+        self.inicio = (int((self.points[0].position.x + 20.0) / relacionX), int((self.points[0].position.y + 15.0) / relacionY))
+        self.final = (int((self.points[-1].position.x + 20.0) / relacionX), int((self.points[-1].position.y + 15.0) / relacionY))
         rospy.loginfo('Nodo inicio "{}"'.format(self.inicio))
         rospy.loginfo('Nodo destino "{}"'.format(self.final))
 
     def gridmap_to_vrep(self, alto, ancho):
-
-        relacionX = 15.0 / alto
-        relacionY = 15.0 / ancho
-
+        relacionX = 40.0 / alto
+        relacionY = 30.0 / ancho
         direccion = None
         for nodo in self.ruta:
             if nodo == self.final:
@@ -395,22 +394,22 @@ class Ruta:
             else:
                 if nodo[0] == anterior[0]:
                     if direccion != 'x':
-                        x.append(anterior[0] * relacionX - 7.5)
-                        y.append(anterior[1] * relacionY - 7.5)
+                        x.append(anterior[0] * relacionX - 20.0)
+                        y.append(anterior[1] * relacionY - 15.0)
                     direccion = 'x'
                 elif nodo[1] == anterior[1]:
                     if direccion != 'y':
-                        x.append(anterior[0] * relacionX - 7.5)
-                        y.append(anterior[1] * relacionY - 7.5)
+                        x.append(anterior[0] * relacionX - 20.0)
+                        y.append(anterior[1] * relacionY - 15.0)
                     direccion = 'y'
             anterior = nodo
-        x.append(self.inicio[0] * relacionX - 7.5)
-        y.append(self.inicio[1] * relacionY - 7.5)
+        x.append(self.inicio[0] * relacionX - 20.0)
+        y.append(self.inicio[1] * relacionY - 15.0)
         x.reverse()
         y.reverse()
         return x, y
 
-    def navegacion(self, req):
+    def navegacion(self):
         """
         Determina la ruta optima.
         ----------
@@ -426,26 +425,35 @@ class Ruta:
 
         rospy.loginfo('Corriendo servicio navegacion')
         gridmap_preprocesado, w, h = self.get_graph(gridmap_points)
+        print('Gridmap Preprocesado')
 
-        self.vrep_to_gridmap(req.inicio, req.destino, w, h)
+        self.vrep_to_gridmap(w, h)
 
         self.ruta = []
-        if req.metodo == 'A':
-            explorados = self.A()
-        elif req.metodo == 'd':
-            explorados = self.dijkstra()
-        else:
-            rospy.logerr('Metodo desconocido "{}"'.format(req.metodo))
-            return None
+        explorados = self.A()
+        # if req.metodo == 'A':
+        #     explorados = self.A()
+        # elif req.metodo == 'd':
+        #     explorados = self.dijkstra()
+        # else:
+        #     rospy.logerr('Metodo desconocido "{}"'.format(req.metodo))
+        #     return None
 
         self.save_ruta(gridmap_preprocesado, explorados)
 
         response = NavegacionResponse()
         response.rutax, response.rutay = self.gridmap_to_vrep(w, h)
-        return response
+        print('aqui')
+        print(response)
+        #return response
 
     def callbackPath(self, param):
-        print(param.poses[1].pose)
+        print('aaaa')
+        # for i in range(len(param.poses)):
+        #     self.points.append(param.poses[i].pose)
+        # self.navegacion()
+            
+        #print(param.poses[0].pose)
             
 
 def main():

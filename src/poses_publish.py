@@ -30,7 +30,7 @@ class Poses(object):
 		# pose.pose = ini
 		pose = [ini,end]
 		path.poses = pose
-		print(path)
+		#print(path)
 		# path.poses.append(pose)
 		# pose.pose = end
 		# pose.pose = end
@@ -81,17 +81,17 @@ def main():
 	try:
 		print('Init node...')
 		rospy.init_node('poses_node', anonymous=True)
-		pubPose = rospy.Publisher('/robocol/poses_publish',Path,queue_size=1)
+		pubPose = rospy.Publisher('/robocol/inicio_destino',Path,queue_size=1)
 		poses = Poses()
 		pub = True
 		time.sleep(1)
 		print('Publishing poses...')
 		rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			if pub:
-				pose_msg = poses.path_msg()
-				pubPose.publish(pose_msg)
-				pub = False
+			#if pub:
+			pose_msg = poses.path_msg()
+			pubPose.publish(pose_msg)
+		#	pub = False
 			rate.sleep()
 	except rospy.ROSInterruptException:
 		return
