@@ -12,7 +12,7 @@ class IMU():
 		print('Init node...')
 		rospy.init_node('IMU',anonymous=True)
 		rospy.Subscriber('/zed2/imu/data',Imu, self.callback_IMU)
-		self.pubVel = rospy.Publisher ('/robocol/IMU_euler', Twist, queue_size=10)
+		self.pubVel = rospy.Publisher ('/robocol/IMU_euler', Twist, queue_size=1)
 
 	def callback_IMU(self,param):
 		x,y,z,w = param.orientation.x,param.orientation.y,param.orientation.z,param.orientation.w

@@ -16,29 +16,39 @@ class MoveLeo(object):
 		super(MoveLeo, self).__init__()
 		self.posicionActual = 0.0
 		self.hayRuta = True
-		self.ruta = [[0,0],[2,0],[2,2],[0,2],[0,0]]
+		self.ruta = []
+		# self.ruta = [[0,0],[2,0],[2,2],[0,2],[0,0]]
+
+		vec = [[-6.57433, -8.74819],[-6, -7], [-4.537165, -5.874095], [-2.5, -3], [0.87335, 1.320051667], [4.2467, 4.92031], [9.72025, 2.5208465], [15.1938, 0.121383]]
+		for i in vec:
+			self.ruta.append([i[0]-vec[0][0],i[1]-vec[0][1]])
+		print(vec)
 		self.x,self.y,self.theta = 0.0,0.0,0.0
 		print('Init node...')
 		rospy.init_node('leo_move', anonymous=True)
 		rospy.Subscriber('/controllers/diff_drive/odom',Odometry, self.setPositionCallback)
 		rospy.Subscriber('/robocol/IMU_euler',Twist, self.callback_IMU)
+		rospy.Subscriber('/robocol/ruta',Float32MultiArray, self.callback_ruta)
 		self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 
 	def callback_IMU(self,param):
 		self.theta = param.angular.z
 		# print(param)
 
+	def callback_ruta(self,param):
+		print(param)
+
 	def girar(self,param):
 		kp = 0.2
-		ka = 0.2 + 0.3 * np.exp(-param)
+		ka = 0.4 + 0.6 * np.exp(-param)
 		giro = Twist()
 		w = ka * param + kp * np.sin(param) * np.cos(param)
 		giro.angular.z = w
 		self.pubVel.publish(giro)
 
 	def adelantar(self,rho, alpha):
-		kp = 0.1 + 0.3 * np.exp(-rho)
-		ka = 0.5 + 0.5 * np.exp(-alpha)
+		kp = 0.4 #+ 0.6 * np.exp(-rho)
+		ka = 0.5 #+ 0.5 * np.exp(-alpha)
 
 		vmax = 1.5
 		msg = Twist()
@@ -108,7 +118,7 @@ class MoveLeo(object):
 						else:
 							alpha = angulo - self.theta
 						self.girar(alpha)
-						# print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
+						print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
 
 					msg = Twist()
 					msg.linear.x = 0.0
@@ -117,12 +127,14 @@ class MoveLeo(object):
 					time.sleep(1)
 
 					print('------------------------------')
-
-					while rho > 0.04 and not rospy.is_shutdown():
+					error = [xf - self.x, yf - self.y]
+					angulo = np.arctan2(error[1], error[0])
+					while rho > 0.07 and not rospy.is_shutdown():
 						# print('advance')
 
 						error = [xf - self.x, yf - self.y]
-						angulo = np.arctan2(error[1], error[0])
+						print('Error: ',error)
+						# angulo = np.arctan2(error[1], error[0])
 						rho = np.sqrt(np.power(error[0], 2) + np.power(error[1], 2))
 						if angulo > 2.8 or angulo < -2.8:
 							b = np.pi - abs(angulo)
@@ -132,8 +144,11 @@ class MoveLeo(object):
 							alpha = c-b
 						else:
 							alpha = angulo - self.theta
-						# print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
-						self.adelantar(rho, alpha)
+						print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
+						if alpha > 0.15 or alpha < -0.15:
+							self.girar(alpha)
+						else:
+							self.adelantar(rho, alpha)
 						# print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
 			msg = Twist()
 			msg.linear.x = 0.0
