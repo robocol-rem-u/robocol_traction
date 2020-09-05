@@ -20,8 +20,12 @@ class Poses(object):
 		
 	def pub(self):
 		path = []
-		path.append(self.ini_pose)
-		path.append(self.end_pose)
+		path.append(self.ini_pose[0])
+		path.append(self.ini_pose[1])
+		path.append(self.ini_pose[2])
+		path.append(self.end_pose[0])
+		path.append(self.end_pose[1])
+		path.append(self.end_pose[2])
 		
 		#print(path)
 		# path.poses.append(pose)
@@ -40,7 +44,7 @@ class Poses(object):
 		# path.poses.append(ini)
 		# # path.poses[0].pose.position.x = 2
 		msg = Float32MultiArray()
-		msg.data = path 
+		msg.data = path
 		print(msg)
 		# pose_msg = poses.path_msg()
 		self.pubPose.publish(msg)
@@ -76,14 +80,14 @@ class Poses(object):
 def main():
 	try:
 		obj = Poses()
-		# pub = True
-		# time.sleep(1)
+		pub = True
+		time.sleep(1)
 		# print('Publishing poses...')
 		rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			#if pub:
-			obj.pub()
-		#	pub = False
+			if pub:
+				obj.pub()
+				pub = False
 			rate.sleep()
 	except rospy.ROSInterruptException:
 		return
