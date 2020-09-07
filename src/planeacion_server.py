@@ -385,8 +385,8 @@ class Ruta:
         rospy.loginfo('Nodo destino "{}"'.format(self.final))
 
     def gridmap_to_vrep(self, alto, ancho):
-        relacionX = 40.0 / alto
-        relacionY = 30.0 / ancho
+        relacionX = 30.0 / alto
+        relacionY = 40.0 / ancho
         direccion = None
         for nodo in self.ruta:
             if nodo == self.final:
@@ -406,8 +406,10 @@ class Ruta:
             anterior = nodo
         x.append(self.inicio[0] * relacionX - 20.0)
         y.append(self.inicio[1] * relacionY - 15.0)
+
         x.reverse()
         y.reverse()
+
         return x, y
 
     def navegacion(self):

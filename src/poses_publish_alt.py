@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import rospy
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
@@ -12,7 +12,7 @@ class Poses(object):
 	def __init__(self):
 		super(Poses, self).__init__()
 		self.ini_pose = [0.0,0.0,0.0]
-		self.end_pose = [0.0,5.0,0.0]
+		self.end_pose = [-8,-2,0.0]
 		
 		print('Init node...')
 		rospy.init_node('poses_node', anonymous=True)
