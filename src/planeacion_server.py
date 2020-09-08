@@ -368,6 +368,7 @@ class Ruta:
         images[len(images) - 1].save(self.ruta_resultados + 'navegacion.gif', format='GIF', append_images=images[1:],
                                      save_all=True,
                                      duration=50, loop=0)
+        print('Termine el gif tututututututu')
 
     def vrep_to_gridmap(self, ancho, alto):
 
@@ -415,14 +416,21 @@ class Ruta:
 
 
     def buscarCercano(self, punto):
+        #print(self.grafo.values()[0])
+        #print(self.grafo.keys()[0])
+
         mini=10000
         nuevo=[]
         for i in self.grafo:
-            
-            dist=((punto[0] - i[0]) ** 2 + (punto[1] - i[1]) ** 2) ** (1 / 2)
-            if dist<mini:
-                nuevo=i
-                mini=dist
+           #print('i: ',i)
+           #print('Punto0: ',punto[0], 'i0,', i[0])
+           # dist=np.sqrt(np.power(punto[0] - i[0],2) + np.power(punto[1] - i[1],2))
+           #dist=((punto[0] - i[0])**2 + (punto[1] - i[1])**2)**(1/2)
+           dist=((punto[0] - i[0])**2.0 + (punto[1] - i[1])**2.0)**(1.0/2.0) 
+           #print(dist)
+           if dist<mini:
+               nuevo=i
+               mini=dist
         return(nuevo)
 
     def navegacion(self):
@@ -446,8 +454,8 @@ class Ruta:
         self.vrep_to_gridmap(w, h)
 
         self.ruta = []
-        print(self.inicio)
-        print(self.final)
+        #print(self.inicio)
+        #print(self.final)
         if (self.inicio not in self.grafo):
             new= self.buscarCercano(self.inicio)
             self.inicio=new
@@ -471,7 +479,8 @@ class Ruta:
         response.rutax, response.rutay = self.gridmap_to_vrep(w, h)
         print('aqui')
         print(response)
-        #return response
+
+        return response
 
     def callbackPath(self, param):
         #print('aaaa')
