@@ -104,6 +104,7 @@ class Ruta:
         self.grafo = None  # grafo de exploracion
         self.heuristica = 'm'
         self.points = []
+        self.pubRuta = rospy.Publisher('/robocol/ruta',Float32MultiArray, queue_size=10)
 
     def euclidiana(self, nodo):
         """
@@ -479,6 +480,16 @@ class Ruta:
         response.rutax, response.rutay = self.gridmap_to_vrep(w, h)
         print('aqui')
         print(response)
+   
+        ans=[]
+        for i in range(0,len(response.rutax)):
+            act= []
+            act.append(response.rutax[i])
+            act.append(response.rutay[i])
+            ans.append(act)
+        msg=Float32MultiArray()
+        msg.data=ans
+        self.pubRuta.publish(msg)
 
         return response
 

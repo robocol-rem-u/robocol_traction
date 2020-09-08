@@ -12,7 +12,7 @@ class Poses(object):
 	def __init__(self):
 		super(Poses, self).__init__()
 		self.ini_pose = [0,0,0.0]
-		self.end_pose = [-10.94,8.68,0.0]
+		self.end_pose = [-9.47,-8.275,0.0]
 		
 		print('Init node...')
 		rospy.init_node('poses_node', anonymous=True)

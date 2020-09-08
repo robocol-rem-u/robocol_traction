@@ -15,17 +15,23 @@ class MoveLeo(object):
 	def __init__(self):
 		super(MoveLeo, self).__init__()
 		self.posicionActual = 0.0
-		self.hayRuta = True
-		self.ruta = [[-6.57433, -8.74819],[-6, -7], [-4.537165, -5.874095], [-2.5, -3], [0.87335, 1.320051667], [4.2467, 4.92031], [9.72025, 2.5208465], [15.1938, 0.121383]]
+		self.pausar=False
+		self.hayRuta = False
+		self.ruta = []
+		rospy.Subscriber('/robocol/ruta', Float32MultiArray, self.setRutaCallback)
 		self.x,self.y,self.theta = 0.0,0.0,0.0
 		print('Init node...')
 		rospy.init_node('leo_move', anonymous=True)
 		rospy.Subscriber('/sim_gazebo_pose', Odometry, self.setPositionCallback)
+		rospy.Subscriber('/robocol/pause', bool, self.setPausar)
 		self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 
 	def callback_IMU(self,param):
 		self.theta = param.angular.z
 		# print(param)
+	def setRutaCallback(self,pruta):
+		self.ruta=pruta.data
+		self.hayRuta=True
 
 	def girar(self,param):
 		kp = 0.4
@@ -33,6 +39,12 @@ class MoveLeo(object):
 		giro = Twist()
 		w = ka * param + kp * np.sin(param) * np.cos(param)
 		giro.angular.z = w
+		while (self.pausar is True):
+			msg = Twist()
+			msg.linear.x = 0.0
+			msg.angular.z = 0.0
+			self.pubVel.publish(msg)
+			
 		self.pubVel.publish(giro)
 
 	def adelantar(self,rho, alpha):
@@ -47,6 +59,12 @@ class MoveLeo(object):
 
 		msg.linear.x = v
 		msg.angular.z = w
+		while (self.pausar is True):
+			msg = Twist()
+			msg.linear.x = 0.0
+			msg.angular.z = 0.0
+			self.pubVel.publish(msg)
+			
 		self.pubVel.publish(msg)
 
 	def setPositionCallback(self,odom):
@@ -59,6 +77,9 @@ class MoveLeo(object):
 		roll,pitch,self.theta = self.quat_2_euler(qx,qy,qz,qw)
 		# print(' x: ',pose.orientation.x,' y: ',pose.orientation.y,'z: ',pose.orientation.z,'w: ',pose.orientation.w)
 		# print(' roll: ',roll,' pitch: ',pitch,'yaw: ',yaw)
+
+	def setPausar(self,pause):
+		self.pausar=pause
 
 	def quat_2_euler(self,x,y,z,w):
 		t0 =  2.0 * (w * x + y * z)
@@ -113,6 +134,9 @@ class MoveLeo(object):
 					msg = Twist()
 					msg.linear.x = 0.0
 					msg.angular.z = 0.0
+					
+	
+						
 					self.pubVel.publish(msg)
 					time.sleep(1)
 
