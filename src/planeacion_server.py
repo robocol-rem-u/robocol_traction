@@ -253,6 +253,7 @@ class Ruta:
             if col < w - 1 and not maze[row][col + 1]:
                 graph[(row, col)].append(("E", (row, col + 1)))
                 graph[(row, col + 1)].append(("W", (row, col)))
+
         self.grafo = graph
 
     def four_point_transform(self, image, pts):
@@ -367,24 +368,25 @@ class Ruta:
         images[len(images) - 1].save(self.ruta_resultados + 'navegacion.gif', format='GIF', append_images=images[1:],
                                      save_all=True,
                                      duration=50, loop=0)
+        print('Termine el gif tututututututu')
 
     def vrep_to_gridmap(self, ancho, alto):
 
         relacionX = float(40.0 / alto)
         relacionY = float(30.0 / ancho)
 
-        rospy.loginfo('Nodo inicio vrep "{}"'.format(self.points[0].position))
-        rospy.loginfo('Nodo destino vrep "{}"'.format(self.points[-1].position))
+        rospy.loginfo('Nodo inicio vrep "{}"'.format(self.points[0]))
+        rospy.loginfo('Nodo destino vrep "{}"'.format(self.points[3]))
 
         rospy.loginfo('Parametros metodo ancho:"{}"'.format(ancho))
         rospy.loginfo('Parametros metodo alto:"{}"'.format(alto))
 
-        self.inicio = (int((self.points[0].position.x + 20.0) / relacionX), int((self.points[0].position.y + 15.0) / relacionY))
-        self.final = (int((self.points[-1].position.x + 20.0) / relacionX), int((self.points[-1].position.y + 15.0) / relacionY))
+        self.inicio = (int((self.points[0] + 20.0) / relacionX), int((self.points[1] + 15.0) / relacionY))
+        self.final = (int((self.points[3] + 20.0) / relacionX), int((self.points[4] + 15.0) / relacionY))
         rospy.loginfo('Nodo inicio "{}"'.format(self.inicio))
         rospy.loginfo('Nodo destino "{}"'.format(self.final))
 
-    def gridmap_to_vrep(self, alto, ancho):
+    def gridmap_to_vrep(self, ancho, alto):
         relacionX = 40.0 / alto
         relacionY = 30.0 / ancho
         direccion = None
@@ -406,9 +408,30 @@ class Ruta:
             anterior = nodo
         x.append(self.inicio[0] * relacionX - 20.0)
         y.append(self.inicio[1] * relacionY - 15.0)
+
         x.reverse()
         y.reverse()
+
         return x, y
+
+
+    def buscarCercano(self, punto):
+        #print(self.grafo.values()[0])
+        #print(self.grafo.keys()[0])
+
+        mini=10000
+        nuevo=[]
+        for i in self.grafo:
+           #print('i: ',i)
+           #print('Punto0: ',punto[0], 'i0,', i[0])
+           # dist=np.sqrt(np.power(punto[0] - i[0],2) + np.power(punto[1] - i[1],2))
+           #dist=((punto[0] - i[0])**2 + (punto[1] - i[1])**2)**(1/2)
+           dist=((punto[0] - i[0])**2.0 + (punto[1] - i[1])**2.0)**(1.0/2.0) 
+           #print(dist)
+           if dist<mini:
+               nuevo=i
+               mini=dist
+        return(nuevo)
 
     def navegacion(self):
         """
@@ -431,6 +454,16 @@ class Ruta:
         self.vrep_to_gridmap(w, h)
 
         self.ruta = []
+        #print(self.inicio)
+        #print(self.final)
+        if (self.inicio not in self.grafo):
+            new= self.buscarCercano(self.inicio)
+            self.inicio=new
+        if (self.final not in self.grafo):
+            new= self.buscarCercano(self.final)
+            print("invalido")
+            self.final=new
+
         explorados = self.A()
         # if req.metodo == 'A':
         #     explorados = self.A()
@@ -446,12 +479,12 @@ class Ruta:
         response.rutax, response.rutay = self.gridmap_to_vrep(w, h)
         print('aqui')
         print(response)
-        #return response
+
+        return response
 
     def callbackPath(self, param):
         #print('aaaa')
-        for i in range(len(param.poses)):
-            self.points.append(param.poses[i].pose)
+        self.points = param.data
         self.navegacion()
             
         #print(param.poses[0].pose)
