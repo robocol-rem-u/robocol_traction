@@ -17,6 +17,8 @@ class Odom(object):
 		z = round(param.pose.pose.position.z,2)
 		# print('GLOBAL COORDINATES:')
 		# print('\r x: {}, y: {}, z: {}\r'.format(x,y,z), end="\r")
+		sys.stdout.write('GLOBAL COORDINATES: \r')
+		print('')
 		sys.stdout.write(str(x) + "% \r")
 		# cat('GLOBAL COORDINATES: %s','efe')
 
