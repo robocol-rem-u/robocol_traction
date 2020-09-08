@@ -253,6 +253,7 @@ class Ruta:
             if col < w - 1 and not maze[row][col + 1]:
                 graph[(row, col)].append(("E", (row, col + 1)))
                 graph[(row, col + 1)].append(("W", (row, col)))
+
         self.grafo = graph
 
     def four_point_transform(self, image, pts):
@@ -384,9 +385,9 @@ class Ruta:
         rospy.loginfo('Nodo inicio "{}"'.format(self.inicio))
         rospy.loginfo('Nodo destino "{}"'.format(self.final))
 
-    def gridmap_to_vrep(self, alto, ancho):
-        relacionX = 30.0 / alto
-        relacionY = 40.0 / ancho
+    def gridmap_to_vrep(self, ancho, alto):
+        relacionX = 40.0 / alto
+        relacionY = 30.0 / ancho
         direccion = None
         for nodo in self.ruta:
             if nodo == self.final:
@@ -412,6 +413,18 @@ class Ruta:
 
         return x, y
 
+
+    def buscarCercano(self, punto):
+        mini=10000
+        nuevo=[]
+        for i in self.grafo:
+            
+            dist=((punto[0] - i[0]) ** 2 + (punto[1] - i[1]) ** 2) ** (1 / 2)
+            if dist<mini:
+                nuevo=i
+                mini=dist
+        return(nuevo)
+
     def navegacion(self):
         """
         Determina la ruta optima.
@@ -433,6 +446,16 @@ class Ruta:
         self.vrep_to_gridmap(w, h)
 
         self.ruta = []
+        print(self.inicio)
+        print(self.final)
+        if (self.inicio not in self.grafo):
+            new= self.buscarCercano(self.inicio)
+            self.inicio=new
+        if (self.final not in self.grafo):
+            new= self.buscarCercano(self.final)
+            print("invalido")
+            self.final=new
+
         explorados = self.A()
         # if req.metodo == 'A':
         #     explorados = self.A()

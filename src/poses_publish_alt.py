@@ -11,7 +11,7 @@ from std_msgs.msg import Float32MultiArray
 class Poses(object):
 	def __init__(self):
 		super(Poses, self).__init__()
-		self.ini_pose = [0.0,0.0,0.0]
+		self.ini_pose = [0,0,0.0]
 		self.end_pose = [-8,-2,0.0]
 		
 		print('Init node...')
