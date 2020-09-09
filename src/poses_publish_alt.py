@@ -9,16 +9,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Pose
 
-<<<<<<< HEAD
 
-
-
-class Poses(object):
-	def __init__(self):
-		super(Poses, self).__init__()
-		self.ini_pose = [0.0,0.0,0.0]
-		self.end_pose = [7.31, 0,0.0]
-=======
 class Poses_Publish(object):
 	def __init__(self):
 		super(Poses_Publish, self).__init__()
@@ -30,7 +21,6 @@ class Poses_Publish(object):
 		self.end_pose = [self.glo_x,self.glo_y,self.glo_z]
 
 		self.landmarks= [[7.31, 0], [7.19,7.55], [18.85,-3.59], [33.77,6.41], [13.22,-13.61],[21.01,13.21],[20.96,3.36], [20.40, -19.41], [14.77,6.89],[22.46,-10.36], [31.56, -18.81], [29.92,11.44], [32.79,-6.79], [2.04,-12.02], [7.63,13.24]]
->>>>>>> 8eef7a1158ea82d267a38ed0cae562b4206cb726
 		
 		print('Starting robocol_poses node...')
 		rospy.init_node('robocol_poses', anonymous=True)
