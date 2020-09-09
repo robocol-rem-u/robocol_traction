@@ -44,7 +44,7 @@ def main():
 		while not rospy.is_shutdown():
 			if pub:
 				obj.pub()
-				if n>2:
+				if n>0:
 					pub = False
 				n += 1
 			rate.sleep()
