@@ -67,7 +67,7 @@ class Sim_Pose(object):
 	def mix_gazebo_n_wheel_odom(self,odom_msg):
 		# Mix Gazebo with wheels
 		qx,qy,qz,qw = self.euler_2_quat(self.wheel_rx,self.wheel_ry,self.wheel_rz)
-		a = 1
+		a = 0.7
 		odom_msg_2 = Odometry()
 		odom_msg_2.pose.pose.position.x    = a*odom_msg.pose.pose.position.x    + (1-a)*self.wheel_x 
 		odom_msg_2.pose.pose.position.y    = a*odom_msg.pose.pose.position.y    + (1-a)*self.wheel_y 
