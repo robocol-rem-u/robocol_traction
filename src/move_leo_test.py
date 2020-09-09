@@ -25,7 +25,7 @@ class MoveLeo(object):
 		self.x,self.y,self.theta = 0.0,0.0,0.0
 		print('Init node...')
 		rospy.init_node('leo_move', anonymous=True)
-		rospy.Subscriber('/sim_gazebo_pose', Odometry, self.setPositionCallback)
+		rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
 		rospy.Subscriber('/robocol/pause', bool, self.setPausar)
 		self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 
