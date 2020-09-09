@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import time
 
@@ -480,55 +480,42 @@ class Ruta:
 
         response = NavegacionResponse()
         response.rutax, response.rutay = self.gridmap_to_vrep(w, h)
-        print('aqui')
+        #print('aqui')
         print(response)
    
-        ans=[]
-        for i in range(0,len(response.rutax)):
-            act= []
-            act.append(response.rutax[i])
-            #act.append(response.rutay[i])
-            ans.append(act)
+        #ans=[]
+        #for i in range(0,len(response.rutax)):
+        #    act= []
+        #    act.append(response.rutax[i])
+        #    act.append(response.rutay[i])
+        #    ans.append(act)
 
         #ans = np.reshape(ans,(len(ans)*len(ans[0]),1))
 
         #print('filas: ',len(ans),' columnas: ', len(ans[0]), ' ans: ', ans)
         #a = numpy.array([1.0, 2.1, 3.2, 4.3, 5.4, 6.5], dtype=numpy.float32)
-        msg=Float32MultiArray()
-        print('antes', msg)
-        msg.data=ans
-        print('despues',msg)
-        self.pubRuta.publish(msg)
+        #msg=Float32MultiArray()
+        #print('antes', msg)
+        #msg.data=ans
+        #print('despues',msg)
+        #self.pubRuta.publish(msg)
 
-        #return response
+        return response
 
-    def callbackPath(self, param):
+    #def callbackPath(self, param):
         #print('aaaa')
-        self.points = param.data
-        self.navegacion()
+    #    self.points = param.data
+    #    self.navegacion()
             
         #print(param.poses[0].pose)
             
-
 def main():
+
     rospy.init_node('navegacion', anonymous=True)
     ruta = Ruta()
-    rospy.Subscriber('/robocol/inicio_destino', Float32MultiArray, ruta.callbackPath)
-    rate = rospy.Rate(10)
-
-    while not rospy.is_shutdown():
-        rate.sleep()
-
-# def main():
-#     """
-#     main del servicio navegacion
-#     """
-#     rospy.init_node('navegacion', anonymous=True)
-
-#     ruta = Ruta()
-#     s = rospy.Service('navegacion', Navegacion, ruta.navegacion)
-#     print('========= Waiting for service ========')
-#     rospy.spin()
+    s = rospy.Service('navegacion', Navegacion, ruta.navegacion)
+    print('========= Waiting for service ========')
+    rospy.spin()
 
 
 if __name__ == '__main__':
