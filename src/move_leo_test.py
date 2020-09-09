@@ -9,6 +9,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, TwistStamped,PoseWithCovariance,Pose
 #from leo_control_auto.msg import Obstacle
 from std_msgs.msg import Int32
+from std_msgs.msg import Bool
 
 
 class MoveLeo(object):
@@ -26,7 +27,7 @@ class MoveLeo(object):
 		print('Init node...')
 		rospy.init_node('leo_move', anonymous=True)
 		rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
-		rospy.Subscriber('/robocol/pause', bool, self.setPausar)
+		rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
 		self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 
 	def callback_IMU(self,param):
@@ -83,7 +84,7 @@ class MoveLeo(object):
 		self.pubVel.publish(msg)
 
 	def calculatePosition(self):
-		#Completar
+		pass
 
 	def setPositionCallback(self,odom):
 		pose = odom.pose.pose
@@ -101,7 +102,7 @@ class MoveLeo(object):
 		pass
 
 	def setPausar(self,pause):
-		self.pausar=pause
+		self.pausar=pause.data
 
 	def quat_2_euler(self,x,y,z,w):
 		t0 =  2.0 * (w * x + y * z)

@@ -11,8 +11,8 @@ from std_msgs.msg import Float32MultiArray
 class Poses(object):
 	def __init__(self):
 		super(Poses, self).__init__()
-		self.ini_pose = [0,0,0.0]
-		self.end_pose = [-9.47,-8.275,0.0]
+		self.ini_pose = [0.0,0.0,0.0]
+		self.end_pose = [2.0,2.0,0.0]
 		
 		print('Init node...')
 		rospy.init_node('poses_node', anonymous=True)
@@ -40,10 +40,13 @@ def main():
 		time.sleep(1)
 		# print('Publishing poses...')
 		rate = rospy.Rate(10)
+		n =0
 		while not rospy.is_shutdown():
 			if pub:
 				obj.pub()
-				pub = False
+				if n>2:
+					pub = False
+				n += 1
 			rate.sleep()
 	except rospy.ROSInterruptException:
 		return
