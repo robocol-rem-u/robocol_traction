@@ -11,7 +11,6 @@ from geometry_msgs.msg import Twist, TwistStamped,PoseWithCovariance,Pose
 from std_msgs.msg import Int32
 from std_msgs.msg import Bool
 
-
 class MoveLeo(object):
 	def __init__(self):
 		super(MoveLeo, self).__init__()
