@@ -2,11 +2,11 @@
 import sys
 import time
 
-import numpy as np
+import numpy
 import rospy,roslib
 import cv2
 import matplotlib.pyplot as plt
-# from robocol_traction.srv import Navegacion, NavegacionResponse, GridmapPoints
+from robocol_traction.srv import Navegacion, NavegacionResponse, GridmapPoints
 from nav_msgs.msg import Path
 from PIL import Image, ImageDraw
 from std_msgs.msg import Float32MultiArray
@@ -108,7 +108,7 @@ class Ruta:
         self.grafo = None  # grafo de exploracion
         self.heuristica = 'm'
         self.points = []
-        self.callback = True
+        self.callback = False
         # Publishers
         
         # self.pub = rospy.Publisher('mytopic', numpy_nd_msg(Float32MultiArray))
@@ -252,8 +252,8 @@ class Ruta:
             Alto del gridmap
         """
 
-        maze = np.where(gridmap == 255, 0, gridmap)  # celda libre
-        maze = np.where(gridmap == 0, 1, maze)  # celda ocupada
+        maze = numpy.where(gridmap == 255, 0, gridmap)  # celda libre
+        maze = numpy.where(gridmap == 0, 1, maze)  # celda ocupada
 
         graph = {(i, j): [] for j in range(w) for i in range(h) if not maze[i][j]}
         for row, col in graph.keys():
@@ -274,26 +274,26 @@ class Ruta:
         for j in range(4):
             rect.append([pts[j * 2], pts[j * 2 + 1]])
 
-        rect = np.array(rect, dtype="float32")
+        rect = numpy.array(rect, dtype="float32")
         (tl, tr, br, bl) = rect
         # compute the width of the new image, which will be the
         # maximum distance between bottom-right and bottom-left
         # x-coordiates or the top-right and top-left x-coordinates
-        widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-        widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+        widthA = numpy.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+        widthB = numpy.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
         maxWidth = max(int(widthA), int(widthB))
         # compute the height of the new image, which will be the
         # maximum distance between the top-right and bottom-right
         # y-coordinates or the top-left and bottom-left y-coordinates
-        heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-        heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+        heightA = numpy.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+        heightB = numpy.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
         maxHeight = max(int(heightA), int(heightB))
         # now that we have the dimensions of the new image, construct
         # the set of destination points to obtain a "birds eye view",
         # (i.e. top-down view) of the image, again specifying points
         # in the top-left, top-right, bottom-right, and bottom-left
         # order
-        dst = np.array([
+        dst = numpy.array([
             [0, 0],
             [maxWidth - 1, 0],
             [maxWidth - 1, maxHeight - 1],
@@ -434,7 +434,7 @@ class Ruta:
         for i in self.grafo:
            #print('i: ',i)
            #print('Punto0: ',punto[0], 'i0,', i[0])
-           # dist=np.sqrt(np.power(punto[0] - i[0],2) + np.power(punto[1] - i[1],2))
+           # dist=numpy.sqrt(numpy.power(punto[0] - i[0],2) + numpy.power(punto[1] - i[1],2))
            #dist=((punto[0] - i[0])**2 + (punto[1] - i[1])**2)**(1/2)
            dist=((punto[0] - i[0])**2.0 + (punto[1] - i[1])**2.0)**(1.0/2.0) 
            #print(dist)
@@ -496,9 +496,8 @@ class Ruta:
         for i in range(0,len(response.rutax)):
             act= []
             act.append(response.rutax[i])
-            #act.append(response.rutay[i])
+            act.append(response.rutay[i])
             ans.append(act)
-
         
         
 
@@ -524,6 +523,7 @@ class Ruta:
     def callbackPath(self, param):
         #print('aaaa')
         self.points = param.data
+        #print('callbackPath')
         self.callback = True
         # self.navegacion()
             
@@ -531,6 +531,59 @@ class Ruta:
 
 ## Use this function to generate message instances using numpy array
 ## types for numerical arrays. 
+## @msg_type Message class: call this functioning on the message type that you pass
+## into a Publisher or Subscriber call. 
+## @returns Message class
+# def numpy_nd_msg(msg_type):
+#     classdict = { '__slots__': msg_type.__slots__, '_slot_types': msg_type._slot_types,
+#                   '_md5sum': msg_type._md5sum, '_type': msg_type._type,
+#                   '_has_header': msg_type._has_header, '_full_text': msg_type._full_text,
+#                   'serialize': _serialize_numpy, 'deserialize': _deserialize_numpy,
+#                   'serialize_numpy': msg_type.serialize_numpy,
+#                   'deserialize_numpy': msg_type.deserialize_numpy
+#                   }
+
+# def _serialize_numpy(self, buff):
+#     """
+#     wrapper for factory-generated class that passes numpy module into serialize
+#     """
+#     # pass in numpy module reference to prevent import in auto-generated code
+#     if self.layout.dim == []:
+#         self.layout.dim = [ MultiArrayDimension('dim%d' %i, self.data.shape[i], self.data.shape[i]*self.data.dtype.itemsize) for i in range(len(self.data.shape))];
+#     self.data = self.data.reshape([1, -1])[0];
+#     return self.serialize_numpy(buff, numpy)
+
+# def _deserialize_numpy(self, str):
+#     """
+#     wrapper for factory-generated class that passes numpy module into deserialize    
+#     """
+#     # pass in numpy module reference to prevent import in auto-generated code
+#     self.deserialize_numpy(str, numpy)
+#     dims=map(lambda x:x.size, self.layout.dim)
+#     self.data = self.data.reshape(dims)
+#     return self     
+
+def _serialize_numpy(self, buff):
+    """
+    wrapper for factory-generated class that passes numpy module into serialize
+    """
+    # pass in numpy module reference to prevent import in auto-generated code
+    if self.layout.dim == []:
+        self.layout.dim = [ MultiArrayDimension('dim%d' %i, self.data.shape[i], self.data.shape[i]*self.data.dtype.itemsize) for i in range(len(self.data.shape))];
+    self.data = self.data.reshape([1, -1])[0];
+    return self.serialize_numpy(buff, numpy)
+
+def _deserialize_numpy(self, str):
+    """
+    wrapper for factory-generated class that passes numpy module into deserialize    
+    """
+    # pass in numpy module reference to prevent import in auto-generated code
+    self.deserialize_numpy(str, numpy)
+    dims=map(lambda x:x.size, self.layout.dim)
+    self.data = self.data.reshape(dims)
+    return self
+
+## Use this function to generate message instances using numpy array types for numerical arrays. 
 ## @msg_type Message class: call this functioning on the message type that you pass
 ## into a Publisher or Subscriber call. 
 ## @returns Message class
@@ -543,37 +596,23 @@ def numpy_nd_msg(msg_type):
                   'deserialize_numpy': msg_type.deserialize_numpy
                   }
 
-def _serialize_numpy(self, buff):
-    """
-    wrapper for factory-generated class that passes numpy module into serialize
-    """
-    # pass in numpy module reference to prevent import in auto-generated code
-    if self.layout.dim == []:
-        self.layout.dim = [ MultiArrayDimension('dim%d' %i, self.data.shape[i], self.data.shape[i]*self.data.dtype.itemsize) for i in range(len(self.data.shape))];
-    self.data = self.data.reshape([1, -1])[0];
-    return self.serialize_numpy(buff, np)
+    # create the numpy message type
+    msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
+    return type(msg_type_name,(msg_type,),classdict)
 
-def _deserialize_numpy(self, str):
-    """
-    wrapper for factory-generated class that passes numpy module into deserialize    
-    """
-    # pass in numpy module reference to prevent import in auto-generated code
-    self.deserialize_numpy(str, np)
-    dims=map(lambda x:x.size, self.layout.dim)
-    self.data = self.data.reshape(dims)
-    return self     
 
 def main():
     rospy.init_node('navegacion', anonymous=True)
     ruta = Ruta()
     rate = rospy.Rate(10)
-    pubRuta = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=10)
+    pub = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
+    print('Waiting')
     while not rospy.is_shutdown():
         if ruta.callback == True:
             ans = ruta.navegacion()
             a = numpy.array(ans, dtype=numpy.float32)
             print("sending\n", a)
-            pubRuta.publish(data=a)
+            pub.publish(data=a)
             ruta.callback = False
         rate.sleep()
 
