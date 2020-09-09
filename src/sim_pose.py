@@ -41,9 +41,9 @@ class Sim_Pose(object):
 		link_num = param.name.index('leo::base_link')
 		# Publish odometry based on Gazebo link states.
 		odom_msg = Odometry()
-		odom_msg.pose.pose.position.x = param.pose[link_num].position.x
-		odom_msg.pose.pose.position.y = param.pose[link_num].position.y
-		odom_msg.pose.pose.position.z = param.pose[link_num].position.z
+		odom_msg.pose.pose.position.x    = param.pose[link_num].position.x
+		odom_msg.pose.pose.position.y    = param.pose[link_num].position.y
+		odom_msg.pose.pose.position.z    = param.pose[link_num].position.z
 		odom_msg.pose.pose.orientation.y = param.pose[link_num].orientation.y
 		odom_msg.pose.pose.orientation.z = param.pose[link_num].orientation.z
 		odom_msg.pose.pose.orientation.x = param.pose[link_num].orientation.x
@@ -67,7 +67,7 @@ class Sim_Pose(object):
 	def mix_gazebo_n_wheel_odom(self,odom_msg):
 		# Mix Gazebo with wheels
 		qx,qy,qz,qw = self.euler_2_quat(self.wheel_rx,self.wheel_ry,self.wheel_rz)
-		a = 0.7
+		a = 1
 		odom_msg_2 = Odometry()
 		odom_msg_2.pose.pose.position.x    = a*odom_msg.pose.pose.position.x    + (1-a)*self.wheel_x 
 		odom_msg_2.pose.pose.position.y    = a*odom_msg.pose.pose.position.y    + (1-a)*self.wheel_y 

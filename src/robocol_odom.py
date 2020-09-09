@@ -2,6 +2,7 @@
 import rospy
 import sys,math,time
 import threading
+import numpy as np
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Twist
@@ -22,12 +23,17 @@ class Odom(object):
 		# Global coordinates correction
 		self.corr_glo_x, self.corr_glo_y, self.corr_glo_z  = 0.0, 0.0, 0.0
 		self.corr_glo_rx,self.corr_glo_ry,self.corr_glo_rz = 0.0, 0.0, 0.0
+		# Global coordinates initial corrections
+		self.ini_glo_x, self.ini_glo_y, self.ini_glo_z  = 0.0, 0.0, 0.0
+		self.ini_glo_rx,self.ini_glo_ry,self.ini_glo_rz = 0.0, 0.0, 0.0
 		# Node init
 		print('Starting robocol_odom node...')
 		rospy.init_node('robocol_odom', anonymous=True)
 		# Publishers
 		print('Publishing in /robocol/odom (Odometry)\n')
 		self.pubOdom = rospy.Publisher('/robocol/odom',Odometry, queue_size=1)
+		print('Publishing in /robocol/pose (Twist)\n')
+		self.pubPose = rospy.Publisher('/robocol/pose',Twist, queue_size=1)
 		# Subscribers
 		print('Subscribing to /zed2/imu/data (Imu)')
 		rospy.Subscriber('/zed2/imu/data', Imu, self.imu_callback)
@@ -50,12 +56,28 @@ class Odom(object):
 
 	def vision_correction_callback(self,param):
 		print('\nCorreción de visión -> x: {} y: {}\n'.format(param.linear.x,param.linear.y))
-		self.corr_glo_x  = self.corr_glo_x  + ( param.linear.x-self.our_glo_x)
-		self.corr_glo_y  = self.corr_glo_y  + ( param.linear.y-self.our_glo_y)
-		self.corr_glo_z  = self.corr_glo_z  + ( param.linear.z-self.our_glo_z)
-		self.corr_glo_rx = self.corr_glo_rx + (param.angular.x-self.our_glo_rx)
-		self.corr_glo_ry = self.corr_glo_ry + (param.angular.y-self.our_glo_ry)
-		self.corr_glo_rz = self.corr_glo_rz + (param.angular.z-self.our_glo_rz)
+		# self.corr_glo_x  = ( param.linear.x - self.our_glo_x)
+		# self.corr_glo_y  = ( param.linear.y - self.our_glo_y)
+		# self.corr_glo_z  = ( param.linear.z - self.our_glo_z)
+		# self.corr_glo_rx = (param.angular.x - self.our_glo_rx)
+		# self.corr_glo_ry = (param.angular.y - self.our_glo_ry)
+		# self.corr_glo_rz = (param.angular.z - self.our_glo_rz)
+
+		self.corr_glo_x  = self.corr_glo_x  + ( param.linear.x - self.our_glo_x)
+		self.corr_glo_y  = self.corr_glo_y  + ( param.linear.y - self.our_glo_y)
+		self.corr_glo_z  = self.corr_glo_z  + ( param.linear.z - self.our_glo_z)
+		# self.corr_glo_rx = self.corr_glo_rx + (param.angular.x - self.our_glo_rx)
+		# self.corr_glo_ry = self.corr_glo_ry + (param.angular.y - self.our_glo_ry)
+		# self.corr_glo_rz = self.corr_glo_rz + (param.angular.z - self.our_glo_rz)
+
+		# self.corr_glo_x  = param.linear.x-self.our_glo_x
+		# self.corr_glo_y  = param.linear.y-self.our_glo_y
+		# self.corr_glo_z  = param.linear.z-self.our_glo_z
+		# self.corr_glo_rx = param.angular.x-self.our_glo_rx
+		# self.corr_glo_ry = param.angular.y-self.our_glo_ry
+		# self.corr_glo_rz = param.angular.z-self.our_glo_rz
+
+
 
 	def odometry_callback(self,param):
 		self.glo_x = round(param.pose.pose.position.x,3)
@@ -67,17 +89,45 @@ class Odom(object):
 		qw = param.pose.pose.orientation.w
 		self.glo_rx,self.glo_ry,self.glo_rz = self.quat_2_euler(qx,qy,qz,qw)
 
-		g_coord = 'GLOBAL x {:.3f} y {:.3f} z {:.3f} rx {:.3f} ry {:.3f} rz {:.3f}'
-		# l_coord = ' LOCAL x {:.3f} y {:.3f} z {:.3f} rx {:.3f} ry {:.3f} rz {:.3f}'
-		msg = '	'+g_coord+'\r'
-		print(msg.format(self.our_glo_x,self.our_glo_y,self.our_glo_z,self.our_glo_rx,self.our_glo_ry,self.our_glo_rz), end="")
-
 		self.our_glo_x  = self.corr_glo_x  + self.glo_x
 		self.our_glo_y  = self.corr_glo_y  + self.glo_y
 		self.our_glo_z  = self.corr_glo_z  + self.glo_z
 		self.our_glo_rx = self.corr_glo_rx + self.glo_rx
 		self.our_glo_ry = self.corr_glo_ry + self.glo_ry
 		self.our_glo_rz = self.corr_glo_rz + self.glo_rz
+		# print('GLOBAL',self.our_glo_rz)
+		if self.our_glo_rz >= np.pi:
+			# print('th: ',self.our_glo_rz,"  -2pi= ",np.pi)
+			self.our_glo_rz = self.our_glo_rz - 2.0*np.pi
+		elif self.our_glo_rz < -np.pi:
+			# print('th: ',self.our_glo_rz,"  2pi= ",np.pi)
+			self.our_glo_rz = self.our_glo_rz + 2.0*np.pi
+
+		pose_msg = Twist()
+		pose_msg.linear.x = self.our_glo_x
+		pose_msg.linear.y = self.our_glo_y
+		pose_msg.angular.z = self.our_glo_rz
+		self.pubPose.publish(pose_msg)
+		# test = self.our_glo_rz
+		# if self.our_glo_rz > np.pi:
+		# 	self.our_glo_rz 0 - self.our_glo_rz
+		# self.our_glo_rz =  self.our_glo_rz % np.pi
+		# self.our_glo_rz = (self.our_glo_rz + 2.0*np.pi) % 2.0*np.pi
+		# if (self.our_glo_rz  > np.pi):
+		#     self.our_glo_rz -= 2.0*np.pi
+
+		g_coord = 'GLOBAL x {:.3f} y {:.3f} z {:.3f} rx {:.3f} ry {:.3f} rz {:.3f}'
+		# l_coord = ' LOCAL x {:.3f} y {:.3f} z {:.3f} rx {:.3f} ry {:.3f} rz {:.3f}'
+		msg = '	'+g_coord+'\r'
+		print(msg.format(self.our_glo_x,self.our_glo_y,self.our_glo_z,self.our_glo_rx,self.our_glo_ry,self.our_glo_rz), end="")
+
+		# self.our_glo_x  = self.ini_glo_x  + self.corr_glo_x  + self.glo_x
+		# self.our_glo_y  = self.ini_glo_y  + self.corr_glo_y  + self.glo_y
+		# self.our_glo_z  = self.ini_glo_z  + self.corr_glo_z  + self.glo_z
+		# self.our_glo_rx = self.ini_glo_rx + self.corr_glo_rx + self.glo_rx
+		# self.our_glo_ry = self.ini_glo_ry + self.corr_glo_ry + self.glo_ry
+		# self.our_glo_rz = self.ini_glo_rz + self.corr_glo_rz + self.glo_rz
+
 
 		odom_msg = Odometry()
 		odom_msg.pose.pose.position.x    = self.our_glo_x
@@ -109,8 +159,8 @@ class Odom(object):
 		self.corr_glo_y  = -self.glo_y
 		self.corr_glo_z  = -self.glo_z
 		self.corr_glo_rx = -self.glo_rx
-		self.corr_glo_ry = -self.glo_ry
 		self.corr_glo_rz = -self.glo_rz
+		self.corr_glo_ry = -self.glo_ry
 
 	def thread_function(self):
 		while self.opciones:
