@@ -2,13 +2,14 @@
 # -- coding: utf-8 --
 import rospy
 import numpy
-import time
+import time,sys
 import roslib
 import math, roslaunch, time
 from std_msgs.msg import String, Int32, Float32MultiArray, Bool, MultiArrayDimension
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, TwistStamped,PoseWithCovariance,Pose
 roslib.load_manifest('rospy')
+
 
 class MoveLeo(object):
     def __init__(self):
@@ -28,16 +29,24 @@ class MoveLeo(object):
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
         self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 
-    def cb(self, data):
-        print ("I heard\n",data.data)
-        self.hayRuta = True
-        self.ruta = data.data
+        rospy.on_shutdown(self.kill)
+        print('')
+
+    # def cb(self, data):
+    #     print ("I heard\n",data.data)
+    #     self.hayRuta = True
+    #     self.ruta = data.data
+    def kill(self):
+        print("\nCerrando nodo...")
+        self.hayRuta = False
+        # sys.exit()
+        print('Presione Enter para finalizar...')
 
     def callback_IMU(self,param):
         self.theta = param.angular.z
         # print(param)
 
-    #def setRutaCallback(self,pruta):
+    # def setRutaCallback(self,pruta):
     #   self.ruta=pruta.data
     #   self.hayRuta=True
 
@@ -139,7 +148,7 @@ class MoveLeo(object):
                     rho = 100
                     alpha = 100
 
-                    while alpha > 0.05 or alpha < - 0.05 and not rospy.is_shutdown():
+                    while (alpha > 0.05 or alpha < - 0.05) and not rospy.is_shutdown() and self.hayRuta:
                         error = [xf - self.x, yf - self.y]
                         angulo = numpy.arctan2(error[1], error[0])
                         # print(' Ángulo: ',angulo)
@@ -177,7 +186,7 @@ class MoveLeo(object):
 
                     print('------------------------------')
 
-                    while rho > 0.04 and not rospy.is_shutdown():
+                    while (rho > 0.04) and not rospy.is_shutdown() and self.hayRuta:
                         # print('advance')
 
                         error = [xf - self.x, yf - self.y]
@@ -202,7 +211,7 @@ class MoveLeo(object):
                             pointStation()
 
                         # print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
-                        print('Avanzando --- rho: {} alpha: {}\r'.format(round(rho,3),round(alpha,3)))
+                        # print('Avanzando --- rho: {} alpha: {}\r'.format(round(rho,3),round(alpha,3)))
                         self.adelantar(rho, alpha)
                         # print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
             msg = Twist()
@@ -211,6 +220,12 @@ class MoveLeo(object):
             self.pubVel.publish(msg)
             self.hayRuta = False
             print('Terminó ruta.')
+
+    def empezarRuta(self,ruta):
+        print('Ruta aceptada')
+        self.ruta = ruta
+        self.hayRuta = True
+        print('Ejecutando...')
 
 
 
@@ -254,10 +269,23 @@ def numpy_nd_msg(msg_type):
     return type(msg_type_name,(msg_type,),classdict)
 
 def callbackPrueba(param):
-    print('Entre al callback: ',param)
+    global moveLeo
+    ruta = param.data
+    print(' Ruta: ')
+    print('  ',ruta)
+    print('  Desea aceptar la ruta? (s/n)')
+    # try:
+    inp = str(raw_input('  > '))
+    if inp == 's':
+        moveLeo.empezarRuta(ruta)
 
+
+# def setRutaCallback(self,pruta):
+    #   self.ruta=pruta.data
+    #   self.hayRuta=True
 
 def main():
+    global moveLeo
     try:
         moveLeo = MoveLeo()
         rospy.Subscriber("/robocol/ruta", numpy_nd_msg(Float32MultiArray), callbackPrueba)
