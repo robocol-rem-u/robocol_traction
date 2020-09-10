@@ -178,17 +178,12 @@ class MoveLeo(object):
                     msg = Twist()
                     msg.linear.x = 0.0
                     msg.angular.z = 0.0
-                    
-    
-                        
                     self.pubVel.publish(msg)
                     time.sleep(1)
 
                     print('------------------------------')
 
                     while (rho > 0.04) and not rospy.is_shutdown() and self.hayRuta:
-                        # print('advance')
-
                         error = [xf - self.x, yf - self.y]
                         angulo = numpy.arctan2(error[1], error[0])
                         rho = numpy.sqrt(numpy.power(error[0], 2) + numpy.power(error[1], 2))
@@ -211,7 +206,7 @@ class MoveLeo(object):
                             pointStation()
 
                         # print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
-                        # print('Avanzando --- rho: {} alpha: {}\r'.format(round(rho,3),round(alpha,3)))
+                        print('Avanzando --- rho: {} alpha: {}\r'.format(round(rho,3),round(alpha,3)))
                         self.adelantar(rho, alpha)
                         # print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
             msg = Twist()
