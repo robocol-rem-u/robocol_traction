@@ -599,14 +599,15 @@ def numpy_nd_msg(msg_type):
     # create the numpy message type
     msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
     return type(msg_type_name,(msg_type,),classdict)
-
+    
 
 def main():
     rospy.init_node('navegacion')
     ruta = Ruta()
     rate = rospy.Rate(10)
-    pub = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
+    pub = rospy.Publisher('/robocol/ruta_no_corregida', numpy_nd_msg(Float32MultiArray), queue_size=1)
     print('Waiting')
+    test = True
     while not rospy.is_shutdown():
         if ruta.callback == True:
             ans = ruta.navegacion()
@@ -614,6 +615,12 @@ def main():
             print("sending\n", a)
             pub.publish(data=a)
             ruta.callback = False
+        if test:
+            print('TEST ON')
+            ans = [[0.0,0.0],[0.0,1.0]]
+            msg = numpy.array(ans, dtype=numpy.float32)
+            print('Publishing ',msg)
+            pub.publish(data=msg)
         rate.sleep()
 
 # def main():

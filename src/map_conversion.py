@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-import rospy
+import rospy,roslib
 import threading
-from std_msgs.msg import Float32MultiArray
+import numpy
+from std_msgs.msg import String, Int32, Float32MultiArray, Bool, MultiArrayDimension
+from rospy.numpy_msg import numpy_msg
+roslib.load_manifest('rospy')
 
 class MapConversion(object):
 	def __init__(self):
@@ -13,11 +16,17 @@ class MapConversion(object):
 		rospy.init_node('map_conversion')
 		# print('Subscribing to /gazebo/link_states (LinkStates)')
 		# rospy.Subscriber('/robocol/pose',Twist, self.pose_callaback)
+
+		# Subscribers
 		print('Subscribing in /robocol/inicio_destino_no_conversion (Float32MultiArray)')
 		rospy.Subscriber('/robocol/inicio_destino_no_conversion', Float32MultiArray, self.callback_ini_des)
-
+		# print('Subscribing in /robocol/ruta_no_corregida (numpy_nd_msg(Float32MultiArray))')
+		# rospy.Subscriber('/robocol/ruta_no_corregida', numpy_nd_msg(Float32MultiArray),self.ruta_no_corregida_callback)
+		# Publishers
 		print('Publishing in /robocol/inicio_destino (Float32MultiArray)')
-		self.pubCoords = rospy.Publisher('/robocol/inicio_destino',Float32MultiArray, queue_size=10)
+		self.pubCoords = rospy.Publisher('/robocol/inicio_destino',Float32MultiArray, queue_size=1)
+		print('Publishing in /robocol/ruta (numpy_nd_msg(Float32MultiArray))')
+		self.pubRutaCorrect = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
 		
 		rospy.on_shutdown(self.kill)
 		print('')
@@ -29,6 +38,11 @@ class MapConversion(object):
 		print("\nCerrando nodo...")
 		self.opciones = False
 		print('Presione Enter para finalizar...')
+
+	# def ruta_no_corregida_callback(self,param):
+	# 	print(param)
+	# 	# self.pubRutaCorrect = param
+
 
 	def callback_ini_des(self,param):
 		print('Coordinate received from poses alt...')
@@ -80,9 +94,51 @@ class MapConversion(object):
 			print('')
 		print('Closing thread...')
 
+def _serialize_numpy(self, buff):
+	"""
+	wrapper for factory-generated class that passes numpy module into serialize
+	"""
+	# pass in numpy module reference to prevent import in auto-generated code
+	if self.layout.dim == []:
+		self.layout.dim = [ MultiArrayDimension('dim%d' %i, self.data.shape[i], self.data.shape[i]*self.data.dtype.itemsize) for i in range(len(self.data.shape))];
+	self.data = self.data.reshape([1, -1])[0];
+	return self.serialize_numpy(buff, numpy)
+
+def _deserialize_numpy(self, str):
+	"""
+	wrapper for factory-generated class that passes numpy module into deserialize    
+	"""
+	# pass in numpy module reference to prevent import in auto-generated code
+	self.deserialize_numpy(str, numpy)
+	dims=map(lambda x:x.size, self.layout.dim)
+	self.data = self.data.reshape(dims)
+	return self
+
+## Use this function to generate message instances using numpy array types for numerical arrays. 
+## @msg_type Message class: call this functioning on the message type that you pass
+## into a Publisher or Subscriber call. 
+## @returns Message class
+def numpy_nd_msg(msg_type):
+	classdict = { '__slots__': msg_type.__slots__, '_slot_types': msg_type._slot_types,
+					'_md5sum': msg_type._md5sum, '_type': msg_type._type,
+					'_has_header': msg_type._has_header, '_full_text': msg_type._full_text,
+					'serialize': _serialize_numpy, 'deserialize': _deserialize_numpy,
+					'serialize_numpy': msg_type.serialize_numpy,
+					'deserialize_numpy': msg_type.deserialize_numpy
+					}
+	# create the numpy message type
+	msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
+	return type(msg_type_name,(msg_type,),classdict)
+
+def ruta_no_corregida_callback(param):
+	print('jaja')
+	print(param)
+
 def main():
 	try:
 		mapConversion = MapConversion()
+		print('Subscribing in /robocol/ruta_no_corregida (numpy_nd_msg(Float32MultiArray))')
+		rospy.Subscriber("/robocol/ruta_no_corregida", numpy_nd_msg(Float32MultiArray),ruta_no_corregida_callback)
 		rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
 			# mapConversion.control()           

@@ -21,10 +21,10 @@ class MoveLeo(object):
         self.detectStation = False
         self.stationCentered = False
         self.ruta = []
-        #rospy.Subscriber('/robocol/ruta', Float32MultiArray, self.setRutaCallback)
+        # rospy.Subscriber('/robocol/ruta', Float32MultiArray, self.setRutaCallback)
         self.x,self.y,self.theta = 0.0,0.0,0.0
         print('Init node...')
-        rospy.init_node('leo_move', anonymous=True)
+        rospy.init_node('leo_move')
         rospy.Subscriber('/robocol/pose', Twist, self.setPositionCallback)
         # rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
@@ -304,9 +304,9 @@ def main():
     global moveLeo
     try:
         moveLeo = MoveLeo()
+        print('Subscribing to /robocol/ruta')
         rospy.Subscriber("/robocol/ruta", numpy_nd_msg(Float32MultiArray), callbackPrueba)
         #rospy.Subscriber("/robocol/ruta2", String, callbackPrueba)
-        print('Subscribing to /robocol/ruta')
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             moveLeo.control()           
