@@ -25,8 +25,9 @@ class MoveLeo(object):
         self.x,self.y,self.theta = 0.0,0.0,0.0
         print('Init node...')
         rospy.init_node('leo_move', anonymous=True)
-        rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
+        # rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
+        rospy.Subscriber('/robocol/pose',Twist, self.pose_callaback)
         self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 
         rospy.on_shutdown(self.kill)
@@ -43,9 +44,15 @@ class MoveLeo(object):
         print('Presione Enter para finalizar...')
 
     def callback_IMU(self,param):
-        self.theta = param.angular.z
+        pass
+        # self.theta = param.angular.z
         # print(param)
 
+    def pose_callaback(self,param):
+        # print('Callabck')
+        self.x     = param.linear.x
+        self.y     = param.linear.y
+        self.theta = param.angular.z
     # def setRutaCallback(self,pruta):
     #   self.ruta=pruta.data
     #   self.hayRuta=True
@@ -163,16 +170,16 @@ class MoveLeo(object):
                         else:
                             alpha = angulo - self.theta
 
-                        while (self.pausar is True):
-                            msg = Twist()
-                            msg.linear.x = 0.0
-                            msg.angular.z = 0.0
-                            self.pubVel.publish(msg)
+                        # while (self.pausar is True):
+                        #     msg = Twist()
+                        #     msg.linear.x = 0.0
+                        #     msg.angular.z = 0.0
+                        #     self.pubVel.publish(msg)
                             
                         # while (self.detectStation is True):
                         #   pointStation()
                         self.girar(alpha)
-                        print('Girando --- rho: {} alpha: {}\r'.format(round(rho,3),round(alpha,3)))
+                        print('Girando --- x: {} y: {} rho: {} theta: {} alpha: {}\r'.format(self.x,self.y,round(rho,3),round(self.theta,3),round(alpha,3)))
                         # print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
 
                     msg = Twist()
@@ -196,17 +203,17 @@ class MoveLeo(object):
                         else:
                             alpha = angulo - self.theta
 
-                        while (self.pausar is True):
-                            msg = Twist()
-                            msg.linear.x = 0.0
-                            msg.angular.z = 0.0
-                            self.pubVel.publish(msg)
+                        # while (self.pausar is True):
+                        #     msg = Twist()
+                        #     msg.linear.x = 0.0
+                        #     msg.angular.z = 0.0
+                        #     self.pubVel.publish(msg)
 
-                        while (self.detectStation is True):
-                            pointStation()
+                        # while (self.detectStation is True):
+                        #     pointStation()
 
                         # print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
-                        print('Avanzando --- rho: {} alpha: {}\r'.format(round(rho,3),round(alpha,3)))
+                        print('Avanzando ---  rho: {} theta: {} alpha: {}\r'.format(round(rho,3),round(self.theta,3),round(alpha,3)))
                         self.adelantar(rho, alpha)
                         # print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
             msg = Twist()
@@ -272,7 +279,10 @@ def callbackPrueba(param):
     # try:
     inp = str(raw_input('  > '))
     if inp == 's':
+        print('Intentando aceptar ruta...')
         moveLeo.empezarRuta(ruta)
+    else:
+        print('Ruta no aceptada.')
 
 
 # def setRutaCallback(self,pruta):
