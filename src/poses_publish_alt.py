@@ -21,7 +21,7 @@ class Poses_Publish(object):
 		self.end_pose = [self.glo_x,self.glo_y,self.glo_z]
 
 		self.landmarks= [[7.31, 0], [7.19,7.55], [18.85,-3.59], [33.77,6.41], [13.22,-13.61],[21.01,13.21],[20.96,3.36], [20.40, -19.41], [14.77,6.89],[22.46,-10.36], [31.56, -18.81], [29.92,11.44], [32.79,-6.79], [2.04,-12.02], [7.63,13.24]]
-		
+		self.waypoints=[[12.19,8.73],[25.04,4.36],[28.62,-6.17],[11.63,-16.85],[7.64,-5.55],[27.48,-13.65]]
 		print('Starting robocol_poses node...')
 		rospy.init_node('robocol_poses')
 		# Publishers
@@ -52,20 +52,21 @@ class Poses_Publish(object):
 	def thread_function(self):
 		while self.opciones:
 			print("Choose an option:")
-			print(" L: To choose landmark.")
+			print(" W: To choose Waypoint")
 			print(" C: To send new coordinate.")
 			print(" R: To publish last coordinate again.")
 			op = str(input(' > '))
-			if op == "L":
-				print(' LANDMARKS:')
-				for i in range(len(self.landmarks)):
+			print(op)
+			if op == "W":
+				print(' WAYPOINTS:')
+				for i in range(len(self.waypoints)):
 					msg = '  Landmark {:2d} -->   x: {:6.2f}   y: {:6.2f}'
-					print(msg.format(i+1,self.landmarks[i][0],self.landmarks[i][1]))
+					print(msg.format(i+1,self.waypoints[i][0],self.waypoints[i][1]))
 				print('   Choose a landmark:')
 				lm = input('   > ')
 				try:
-					xlm = self.landmarks[int(lm)-1][0]
-					ylm = self.landmarks[int(lm)-1][1]
+					xlm = self.waypoints[int(lm)-1][0]
+					ylm = self.waypoints[int(lm)-1][1]
 					print(msg.format(int(lm),xlm,ylm))
 				except Exception as e:
 					print('Not a number')
