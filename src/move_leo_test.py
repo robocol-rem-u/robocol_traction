@@ -25,11 +25,8 @@ class MoveLeo(object):
         self.x,self.y,self.theta = 0.0,0.0,0.0
         print('Init node...')
         rospy.init_node('leo_move', anonymous=True)
-<<<<<<< HEAD
         rospy.Subscriber('/robocol/pose', Twist, self.setPositionCallback)
-=======
         # rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
->>>>>>> 6e1d88956ef7356ba53e4a188d9930e3b13974ab
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
         rospy.Subscriber('/robocol/pose',Twist, self.pose_callaback)
         self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
@@ -217,11 +214,11 @@ class MoveLeo(object):
                         else:
                             alpha = angulo - self.theta
 
-                        # while (self.pausar is True):
-                        #     msg = Twist()
-                        #     msg.linear.x = 0.0
-                        #     msg.angular.z = 0.0
-                        #     self.pubVel.publish(msg)
+                        while (self.pausar is True):
+                            msg = Twist()
+                            msg.linear.x = 0.0
+                            msg.angular.z = 0.0
+                            self.pubVel.publish(msg)
 
                         # while (self.detectStation is True):
                         #     pointStation()
