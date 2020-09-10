@@ -25,6 +25,7 @@ class MoveLeo(object):
         self.x,self.y,self.theta = 0.0,0.0,0.0
         print('Init node...')
         rospy.init_node('leo_move', anonymous=True)
+        rospy.Subscriber('/robocol/pose', Twist, self.setPositionCallback)
         # rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
         rospy.Subscriber('/robocol/pose',Twist, self.pose_callaback)
@@ -106,13 +107,14 @@ class MoveLeo(object):
         pass
 
     def setPositionCallback(self,odom):
-        pose = odom.pose.pose
-        self.posicionActual = pose
-        self.x = round(pose.position.x,4)
-        self.y = round(pose.position.y,4)
+        # pose = odom.pose.pose
+        #self.posicionActual = pose
+        self.x = round(odom.linear.x,3)
+        self.y = round(odom.linear.y,3)
+        self.theta = round(odom.angular.z,3)
         # print(' x: ',self.x,' y: ',self.y)
-        qx,qy,qz,qw = pose.orientation.x,pose.orientation.y,pose.orientation.z,pose.orientation.w
-        roll,pitch,self.theta = self.quat_2_euler(qx,qy,qz,qw)
+        #qx,qy,qz,qw = pose.orientation.x,pose.orientation.y,pose.orientation.z,pose.orientation.w
+        #roll,pitch,self.theta = self.quat_2_euler(qx,qy,qz,qw)
         # print(' x: ',pose.orientation.x,' y: ',pose.orientation.y,'z: ',pose.orientation.z,'w: ',pose.orientation.w)
         # print(' roll: ',roll,' pitch: ',pitch,'yaw: ',yaw)
 
@@ -170,11 +172,20 @@ class MoveLeo(object):
                         else:
                             alpha = angulo - self.theta
 
+
+                        while (self.pausar is True):
+                            print('Pausado')
+                            msg = Twist()
+                            msg.linear.x = 0.0
+                            msg.angular.z = 0.0
+                            self.pubVel.publish(msg)
+
                         # while (self.pausar is True):
                         #     msg = Twist()
                         #     msg.linear.x = 0.0
                         #     msg.angular.z = 0.0
                         #     self.pubVel.publish(msg)
+
                             
                         # while (self.detectStation is True):
                         #   pointStation()
@@ -203,11 +214,11 @@ class MoveLeo(object):
                         else:
                             alpha = angulo - self.theta
 
-                        # while (self.pausar is True):
-                        #     msg = Twist()
-                        #     msg.linear.x = 0.0
-                        #     msg.angular.z = 0.0
-                        #     self.pubVel.publish(msg)
+                        while (self.pausar is True):
+                            msg = Twist()
+                            msg.linear.x = 0.0
+                            msg.angular.z = 0.0
+                            self.pubVel.publish(msg)
 
                         # while (self.detectStation is True):
                         #     pointStation()
