@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -- coding: utf-8 --
 import rospy,roslib
 import threading
@@ -25,8 +25,7 @@ class MapConversion(object):
 		# Publishers
 		print('Publishing in /robocol/inicio_destino (Float32MultiArray)')
 		self.pubCoords = rospy.Publisher('/robocol/inicio_destino',Float32MultiArray, queue_size=1)
-		print('Publishing in /robocol/ruta (numpy_nd_msg(Float32MultiArray))')
-		self.pubRutaCorrect = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
+		
 		
 		rospy.on_shutdown(self.kill)
 		print('')
@@ -71,7 +70,7 @@ class MapConversion(object):
 			print("Choose an option:")
 			print(" I: To enter initial GLOBAL coordinates respect to center of map.")
 			# print(" - Para ingresar coordenadas globales (G)")
-			op = input('> ')
+			op = raw_input('> ')
 			if op == "I":
 				print(" Enter desired GLOBAL coordinates:")
 				print("  Enter x coordinate:")
@@ -95,14 +94,14 @@ class MapConversion(object):
 		print('Closing thread...')
 
 def _serialize_numpy(self, buff):
-	"""
-	wrapper for factory-generated class that passes numpy module into serialize
-	"""
-	# pass in numpy module reference to prevent import in auto-generated code
-	if self.layout.dim == []:
-		self.layout.dim = [ MultiArrayDimension('dim%d' %i, self.data.shape[i], self.data.shape[i]*self.data.dtype.itemsize) for i in range(len(self.data.shape))];
-	self.data = self.data.reshape([1, -1])[0];
-	return self.serialize_numpy(buff, numpy)
+    """
+    wrapper for factory-generated class that passes numpy module into serialize
+    """
+    # pass in numpy module reference to prevent import in auto-generated code
+    if self.layout.dim == []:
+        self.layout.dim = [ MultiArrayDimension('dim%d' %i, self.data.shape[i], self.data.shape[i]*self.data.dtype.itemsize) for i in range(len(self.data.shape))];
+    self.data = self.data.reshape([1, -1])[0];
+    return self.serialize_numpy(buff, numpy)
 
 def _deserialize_numpy(self, str):
 	"""
@@ -114,33 +113,53 @@ def _deserialize_numpy(self, str):
 	self.data = self.data.reshape(dims)
 	return self
 
-## Use this function to generate message instances using numpy array types for numerical arrays. 
+## Use this function to generate message instances using numpy array
+## types for numerical arrays. 
 ## @msg_type Message class: call this functioning on the message type that you pass
 ## into a Publisher or Subscriber call. 
 ## @returns Message class
 def numpy_nd_msg(msg_type):
+	print('numpy_nd_msg')
 	classdict = { '__slots__': msg_type.__slots__, '_slot_types': msg_type._slot_types,
-					'_md5sum': msg_type._md5sum, '_type': msg_type._type,
-					'_has_header': msg_type._has_header, '_full_text': msg_type._full_text,
-					'serialize': _serialize_numpy, 'deserialize': _deserialize_numpy,
-					'serialize_numpy': msg_type.serialize_numpy,
-					'deserialize_numpy': msg_type.deserialize_numpy
-					}
+				'_md5sum': msg_type._md5sum, '_type': msg_type._type,
+				'_has_header': msg_type._has_header, '_full_text': msg_type._full_text,
+				'serialize': _serialize_numpy, 'deserialize': _deserialize_numpy,
+				'serialize_numpy': msg_type.serialize_numpy,
+				'deserialize_numpy': msg_type.deserialize_numpy
+}
 	# create the numpy message type
 	msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
 	return type(msg_type_name,(msg_type,),classdict)
 
 def ruta_no_corregida_callback(param):
-	print('jaja')
-	print(param)
+	global mapConversion,pubRutaCorrect
+	print(' ')
+	nueva_ruta = []
+	ruta = param.data
+	for i in ruta:
+		vec = [i[0]-mapConversion.x_moved,i[1]-mapConversion.y_moved]
+		nueva_ruta.append(vec)
+		print(i)
+	# nueva_ruta	
+ # 	a = numpy.array(nueva_ruta, dtype=numpy.float32)
+	# print("sending\n", a)
+	# pubRutaCorrect.publish(data=a)
+	print('Ruta')
+	print(ruta)
+	print('Nueva ruta')
+	print(nueva_ruta)
 
 def main():
+	global mapConversion,pubRutaCorrect
 	try:
 		mapConversion = MapConversion()
 		print('Subscribing in /robocol/ruta_no_corregida (numpy_nd_msg(Float32MultiArray))')
 		rospy.Subscriber("/robocol/ruta_no_corregida", numpy_nd_msg(Float32MultiArray),ruta_no_corregida_callback)
+		print('Publishing in /robocol/ruta (numpy_nd_msg(Float32MultiArray))')
+		pubRutaCorrect = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
 		rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
+
 			# mapConversion.control()           
 			rate.sleep()
 	except rospy.ROSInterruptException:

@@ -276,7 +276,6 @@ def numpy_nd_msg(msg_type):
                 'serialize_numpy': msg_type.serialize_numpy,
                 'deserialize_numpy': msg_type.deserialize_numpy
                 }
-
     # create the numpy message type
     msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
     return type(msg_type_name,(msg_type,),classdict)

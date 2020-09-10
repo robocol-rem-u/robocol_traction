@@ -325,7 +325,7 @@ class Ruta:
         gridmap[(gridmap >= 179) & (gridmap <= 238)] = 0
         gridmap[(gridmap >= 241) & (gridmap <= 255)] = 255
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
         gridmap_dilatated = cv2.dilate(cv2.bitwise_not(gridmap), kernel, iterations=1)
         gridmap_dilatated = cv2.bitwise_not(gridmap_dilatated)
 
@@ -607,7 +607,7 @@ def main():
     rate = rospy.Rate(10)
     pub = rospy.Publisher('/robocol/ruta_no_corregida', numpy_nd_msg(Float32MultiArray), queue_size=1)
     print('Waiting')
-    test = True
+    test = False # To true only if testing numpy messages.
     while not rospy.is_shutdown():
         if ruta.callback == True:
             ans = ruta.navegacion()
