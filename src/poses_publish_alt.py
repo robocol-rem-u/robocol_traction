@@ -23,10 +23,10 @@ class Poses_Publish(object):
 		self.landmarks= [[7.31, 0], [7.19,7.55], [18.85,-3.59], [33.77,6.41], [13.22,-13.61],[21.01,13.21],[20.96,3.36], [20.40, -19.41], [14.77,6.89],[22.46,-10.36], [31.56, -18.81], [29.92,11.44], [32.79,-6.79], [2.04,-12.02], [7.63,13.24]]
 		
 		print('Starting robocol_poses node...')
-		rospy.init_node('robocol_poses', anonymous=True)
+		rospy.init_node('robocol_poses')
 		# Publishers
-		print('Publishing in /robocol/inicio_destino (Float32MultiArray)')
-		self.pubPose = rospy.Publisher('/robocol/inicio_destino',Float32MultiArray,queue_size=1)
+		print('Publishing in /robocol/inicio_destino_no_conversion (Float32MultiArray)')
+		self.pubPose = rospy.Publisher('/robocol/inicio_destino_no_conversion',Float32MultiArray,queue_size=1)
 		# print('Publishing in /robocol/odom (Odometry)\n')
 		# self.pubOdom = rospy.Publisher('/robocol/odom',Odometry, queue_size=1)
 		# # Subscribers
@@ -107,6 +107,11 @@ class Poses_Publish(object):
 		poses_msg.data = ini_end
 		self.pubPose.publish(poses_msg)
 
+	def pub_test(self):
+		print('Printing test')
+		test = Float32MultiArray()
+		self.pubPose.publish(test)
+
 def main():
 	try:
 		poses_Publish = Poses_Publish()
@@ -114,7 +119,7 @@ def main():
 		time.sleep(1)
 		rate = rospy.Rate(10)
 		while not rospy.is_shutdown():
-			# poses_Publish.pub()
+			# poses_Publish.pub_test()
 			rate.sleep()
 	except rospy.ROSInterruptException:
 		return

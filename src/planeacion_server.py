@@ -602,7 +602,7 @@ def numpy_nd_msg(msg_type):
 
 
 def main():
-    rospy.init_node('navegacion', anonymous=True)
+    rospy.init_node('navegacion')
     ruta = Ruta()
     rate = rospy.Rate(10)
     pub = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
