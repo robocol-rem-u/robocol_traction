@@ -3,17 +3,17 @@ import rospy
 import cv2
 import numpy as np
 from robocol_traction.srv import GridmapPoints, GridmapPointsResponse
-
+from PIL import Image
 
 class Points:
 
     def __init__(self):
-        self.ruta_imagen = './src/robocol_traction/map/ERC_map.pgm'  # ruta de la imagen
+        self.ruta_imagen = './src/robocol_traction/map/sinBOrde.png'  # ruta de la imagen
         # self.dim = (int(500), int(500))  # Dimensiones del mapa
         self.point= [] # puntos de las esquinas
         self.i = 0
 	
-
+	self.matriz=np.array(Image.open('./src/robocol_traction/map/sinBOrde.png'))
 	
 
 
@@ -31,14 +31,17 @@ class Points:
             self.point.append( int(x))
        
             self.point.append(int(y))
-	    numx=40.0/795.0
-            numy=30.0/594.0
-	    print("punto x " + str ((self.point[1]-398)*numx))
-	    print("punto y " + str ((self. point[0]-298)*numy))
- 
+	    numx=40.0/928.0
+            numy=30.0/747.0
+	    print(self.point[0])
+	    print(self.point[1])
+	    print(self.matriz.shape)
+	    print("punto x " + str ((self.point[1]-464.5)*numx))
+	    print("punto y " + str ((self. point[0]-373.5)*numy))
+ 	    
            
             self.i += 1
-
+	    
     def gridmap_points(self):
         """
         Determina las esquinas del gridmap.
@@ -48,6 +51,7 @@ class Points:
         """
         rospy.loginfo('Corriendo servicio gridmap_points')
         imagen = cv2.imread(self.ruta_imagen)
+	#cv2.line(imagen, (start_x, start_y), (end_x, end_y), (255, 0, 0), 1, 1)
 	dimensions = imagen.shape
 	print(dimensions) 
         # dim = (383, 412)
@@ -58,9 +62,9 @@ class Points:
 
             cv2.waitKey(10)
             cv2.setMouseCallback('gridmap', self.click)
-		
-            if self.i == 1:
-                cv2.destroyWindow('gridmap')  # Destruye la imagen
+	    imagen[point[0], point[1]] = (0, 0, 255)
+            #if self.i == 1:
+             #   cv2.destroyWindow('gridmap')  # Destruye la imagen
 
         #response = GridmapPointsResponse()
         #response.point = self.point
@@ -75,7 +79,7 @@ def main():
     points = Points()
     points.gridmap_points()
     # s = rospy.Service('gridmap_points', GridmapPoints, points.gridmap_points)
-    print('========= Waiting for service ========')
+    #print('========= Waiting for service ========')
     rospy.spin()
 
 
