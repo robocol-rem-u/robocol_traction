@@ -30,9 +30,9 @@ class Odom(object):
 		print('Starting robocol_odom node...')
 		rospy.init_node('robocol_odom', anonymous=True)
 		# Publishers
-		print('Publishing in /robocol/odom (Odometry)\n')
+		print('Publishing in /robocol/odom (Odometry)')
 		self.pubOdom = rospy.Publisher('/robocol/odom',Odometry, queue_size=1)
-		print('Publishing in /robocol/pose (Twist)\n')
+		print('Publishing in /robocol/pose (Twist)')
 		self.pubPose = rospy.Publisher('/robocol/pose',Twist, queue_size=1)
 		# Subscribers
 		print('Subscribing to /zed2/imu/data (Imu)')
