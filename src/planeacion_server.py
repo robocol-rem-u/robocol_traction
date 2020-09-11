@@ -325,7 +325,7 @@ class Ruta:
         gridmap[(gridmap >= 179) & (gridmap <= 238)] = 0
         gridmap[(gridmap >= 241) & (gridmap <= 255)] = 255
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
         gridmap_dilatated = cv2.dilate(cv2.bitwise_not(gridmap), kernel, iterations=1)
         gridmap_dilatated = cv2.bitwise_not(gridmap_dilatated)
 
@@ -452,7 +452,7 @@ class Ruta:
         """
 
         #gridmap_points = rospy.ServiceProxy('gridmap_points', GridmapPoints)
-        gridmap_points = [9, 51, 615, 53, 614, 854, 7, 850]
+        gridmap_points =  [8, 6, 606, 6, 607, 802, 7, 804]
 
         #resp = gridmap_points()
         rospy.loginfo('Corriendo servicio gridmap points"{}"'.format(gridmap_points))
