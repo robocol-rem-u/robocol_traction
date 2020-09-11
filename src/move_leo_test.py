@@ -21,14 +21,14 @@ class MoveLeo(object):
         self.detectStation = False
         self.stationCentered = False
         self.ruta = [[ 2.1105528 ,14.0      ],
- [ 2.1105528  ,7.0      ],
- [ 2.5125628 , 7.0       ],
- [ 2.5125628  ,6.8      ],
- [ 2.7135677 , 6.8      ],
- [ 2.7135677  ,6.2      ],
- [ 3.115578   ,6.2      ],
- [ 3.115578   ,3.4      ],
- [14.572865   ,3.4      ]]
+                     [ 2.1105528  ,7.0      ],
+                     [ 2.5125628 , 7.0       ],
+                     [ 2.5125628  ,6.8      ],
+                     [ 2.7135677 , 6.8      ],
+                     [ 2.7135677  ,6.2      ],
+                     [ 3.115578   ,6.2      ],
+                     [ 3.115578   ,3.4      ],
+                     [14.572865   ,3.4      ]]
         self.timeout = True
         self.timeElapsed = 0
         self.landmarks= [[7.31, 0], [7.19,7.55], [18.85,-3.59], [33.77,6.41], [13.22,-13.61],[21.01,13.21],[20.96,3.36], [20.40, -19.41], [14.77,6.89],[22.46,-10.36], [31.56, -18.81], [29.92,11.44], [32.79,-6.79], [2.04,-12.02], [7.63,13.24]]
@@ -39,7 +39,7 @@ class MoveLeo(object):
 
         rospy.Subscriber('/robocol/pose', Twist, self.setPositionCallback)
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
-        rospy.Subscriber('/robocol_vision_object_FINAL', String, self.setDetectStationCallback)
+        #rospy.Subscriber('/robocol_vision_object_FINAL', String, self.setDetectStationCallback)
         #Crear subscriber de vision
         self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=1)
         self.pubPoseCorr = rospy.Publisher('/robocol/vision_correction',Twist, queue_size=1)
