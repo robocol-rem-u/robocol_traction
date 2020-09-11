@@ -21,15 +21,18 @@ class MoveLeo(object):
         self.detectStation = False
         self.stationCentered = False
         self.ruta = []
-        # rospy.Subscriber('/robocol/ruta', Float32MultiArray, self.setRutaCallback)
+        self.landmarks= [[7.31, 0], [7.19,7.55], [18.85,-3.59], [33.77,6.41], [13.22,-13.61],[21.01,13.21],[20.96,3.36], [20.40, -19.41], [14.77,6.89],[22.46,-10.36], [31.56, -18.81], [29.92,11.44], [32.79,-6.79], [2.04,-12.02], [7.63,13.24]]
+        #rospy.Subscriber('/robocol/ruta', Float32MultiArray, self.setRutaCallback)
         self.x,self.y,self.theta = 0.0,0.0,0.0
         print('Init node...')
-        rospy.init_node('leo_move')
+        rospy.init_node('leo_move', anonymous=True)
+
         rospy.Subscriber('/robocol/pose', Twist, self.setPositionCallback)
-        # rospy.Subscriber('/robocol/odom', Odometry, self.setPositionCallback)
         rospy.Subscriber('/robocol/pause', Bool, self.setPausar)
-        rospy.Subscriber('/robocol/pose',Twist, self.pose_callaback)
-        self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
+        rospy.Subscriber('/robocol_vision_object_FINAL', String, self.setDetectStationCallback)
+        #Crear subscriber de vision
+        self.pubVel = rospy.Publisher('/cmd_vel',Twist, queue_size=1)
+        self.pubPoseCorr = rospy.Publisher('/robocol/vision_correction',Twist, queue_size=1)
 
         rospy.on_shutdown(self.kill)
         print('')
@@ -73,7 +76,7 @@ class MoveLeo(object):
 
     def adelantar(self,rho, alpha):
         kp = 1 + 0.5 * numpy.exp(-rho)
-        ka = 1.5 + 0.5 * numpy.exp(-alpha)
+        ka = 1.2 + 0.7 * numpy.exp(-alpha)
 
         vmax = 1.5
         msg = Twist()
@@ -104,7 +107,24 @@ class MoveLeo(object):
         self.pubVel.publish(msg)
 
     def calculatePosition(self):
-        pass
+        msj = Twist()
+        x_calc = self.landmarks[self.tagNumber][0]-self.depth*numpy.cos(self.theta)
+        y_calc = self.landmarks[self.tagNumber][1]-self.depth*numpy.sin(self.theta)
+        msj.linear.x = x_calc
+        msj.linear.y = y_calc
+        delta_x = abs(self.x-x_calc)
+        delta_y = abs(self.y-y_calc)
+
+        if delta_x > 2.5 or delta_y > 2.5:
+            print('No se acepto correcion posicion(fuera de rango)')
+        else:
+            print('Se acepto la correcion de posicion')
+            print('x: {} y: {}'.format(x_calc, y_calc))
+            pubPoseCorr.publish(msj)
+            print('Publicado')
+
+        self.detectStation = False
+
 
     def setPositionCallback(self,odom):
         # pose = odom.pose.pose
@@ -119,8 +139,32 @@ class MoveLeo(object):
         # print(' roll: ',roll,' pitch: ',pitch,'yaw: ',yaw)
 
     def setDetectStationCallback(self, param):
+
+        msn=param.msn[1:-1]
+        msn=msn.split(',')
+        Bandera=int(msn[0])
+
+        if Bandera ==1:
+            self.detectStation = True
+        else:
+            self.detectStation = False
+
+        rango=int(msn[1])
+
+        direccion=int(msn[2])
+        if direccion==1:
+            self.twistDirection = 1
+        elif direccion == 2:
+            self.twistDirection = -1
+        else:
+            self.twistDirection = 0
+            self.stationCentered = True
+
+
+        self.depth=float(msn[3])
+        self.tagNumber = int(msn[4])
+        #CoorMsgAA = [detectamos,rango,direccion 1 iz 2 der 3 cen,profundidad,tag ]
         #Completar
-        pass
 
     def setPausar(self,pause):
         self.pausar=pause.data
@@ -179,16 +223,10 @@ class MoveLeo(object):
                             msg.linear.x = 0.0
                             msg.angular.z = 0.0
                             self.pubVel.publish(msg)
-
-                        # while (self.pausar is True):
-                        #     msg = Twist()
-                        #     msg.linear.x = 0.0
-                        #     msg.angular.z = 0.0
-                        #     self.pubVel.publish(msg)
-
-                            
-                        # while (self.detectStation is True):
-                        #   pointStation()
+   
+                        while (self.detectStation is True):
+                           pointStation()
+                        
                         self.girar(alpha)
                         print('Girando --- x: {} y: {} rho: {} theta: {} alpha: {}\r'.format(self.x,self.y,round(rho,3),round(self.theta,3),round(alpha,3)))
                         # print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
@@ -201,7 +239,7 @@ class MoveLeo(object):
 
                     print('------------------------------')
 
-                    while (rho > 0.04) and not rospy.is_shutdown() and self.hayRuta:
+                    while (rho > 0.07) and not rospy.is_shutdown() and self.hayRuta:
                         error = [xf - self.x, yf - self.y]
                         angulo = numpy.arctan2(error[1], error[0])
                         rho = numpy.sqrt(numpy.power(error[0], 2) + numpy.power(error[1], 2))
@@ -215,13 +253,14 @@ class MoveLeo(object):
                             alpha = angulo - self.theta
 
                         while (self.pausar is True):
+                            print('Pausado')
                             msg = Twist()
                             msg.linear.x = 0.0
                             msg.angular.z = 0.0
                             self.pubVel.publish(msg)
 
-                        # while (self.detectStation is True):
-                        #     pointStation()
+                        while (self.detectStation is True):
+                            pointStation()
 
                         # print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
                         print('Avanzando ---  rho: {} theta: {} alpha: {}\r'.format(round(rho,3),round(self.theta,3),round(alpha,3)))
@@ -276,6 +315,7 @@ def numpy_nd_msg(msg_type):
                 'serialize_numpy': msg_type.serialize_numpy,
                 'deserialize_numpy': msg_type.deserialize_numpy
                 }
+
     # create the numpy message type
     msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
     return type(msg_type_name,(msg_type,),classdict)
@@ -303,9 +343,9 @@ def main():
     global moveLeo
     try:
         moveLeo = MoveLeo()
-        print('Subscribing to /robocol/ruta')
         rospy.Subscriber("/robocol/ruta", numpy_nd_msg(Float32MultiArray), callbackPrueba)
         #rospy.Subscriber("/robocol/ruta2", String, callbackPrueba)
+        print('Subscribing to /robocol/ruta')
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             moveLeo.control()           
