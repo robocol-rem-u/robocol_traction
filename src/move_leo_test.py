@@ -85,8 +85,8 @@ class MoveLeo(object):
         self.pubVel.publish(giro)
 
     def adelantar(self,rho, alpha):
-        kp = 1 + 0.5 * numpy.exp(-rho)
-        ka = 1.2 + 0.7 * numpy.exp(-alpha)
+        kp = 10 + 0.5 * numpy.exp(-rho)
+        ka = 10.2 + 0.7 * numpy.exp(-alpha)
 
         vmax = 1.5
         msg = Twist()
