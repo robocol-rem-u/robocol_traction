@@ -17,7 +17,7 @@ class MoveLeo(object):
         self.posicionActual = 0.0
         self.twistDirection = 0.0
         self.pausar=False
-        self.hayRuta = False
+        self.hayRuta = True
         self.detectStation = False
         self.stationCentered = False
         self.ruta = [[ 2.1105528 ,14.0      ],
