@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import sys
 import time
 
@@ -325,7 +325,7 @@ class Ruta:
         gridmap[(gridmap >= 179) & (gridmap <= 238)] = 0
         gridmap[(gridmap >= 241) & (gridmap <= 255)] = 255
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
         gridmap_dilatated = cv2.dilate(cv2.bitwise_not(gridmap), kernel, iterations=1)
         gridmap_dilatated = cv2.bitwise_not(gridmap_dilatated)
 
@@ -599,15 +599,14 @@ def numpy_nd_msg(msg_type):
     # create the numpy message type
     msg_type_name = "Numpy_%s"%msg_type._type.replace('/', '__')
     return type(msg_type_name,(msg_type,),classdict)
-    
+
 
 def main():
-    rospy.init_node('navegacion')
+    rospy.init_node('navegacion', anonymous=True)
     ruta = Ruta()
     rate = rospy.Rate(10)
-    pub = rospy.Publisher('/robocol/ruta_no_corregida', numpy_nd_msg(Float32MultiArray), queue_size=1)
+    pub = rospy.Publisher('/robocol/ruta', numpy_nd_msg(Float32MultiArray), queue_size=1)
     print('Waiting')
-    test = False # To true only if testing numpy messages.
     while not rospy.is_shutdown():
         if ruta.callback == True:
             ans = ruta.navegacion()
@@ -615,12 +614,6 @@ def main():
             print("sending\n", a)
             pub.publish(data=a)
             ruta.callback = False
-        if test:
-            print('TEST ON')
-            ans = [[0.0,0.0],[0.0,1.0]]
-            msg = numpy.array(ans, dtype=numpy.float32)
-            print('Publishing ',msg)
-            pub.publish(data=msg)
         rate.sleep()
 
 # def main():
