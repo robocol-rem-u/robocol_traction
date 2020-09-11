@@ -5,7 +5,7 @@ import time
 import numpy
 import rospy,roslib
 import cv2
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from robocol_traction.srv import Navegacion, NavegacionResponse, GridmapPoints
 from nav_msgs.msg import Path
 from PIL import Image, ImageDraw
