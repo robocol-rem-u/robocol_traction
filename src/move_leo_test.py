@@ -98,15 +98,18 @@ class MoveLeo(object):
         msg = Twist()
         v = 0
         if not self.stationCentered:
+            print('Girando')
             w = 0.3*self.twistDirection
         else:
             w = 0
-            calculatePosition()
+            print('Centrado')
+            self.calculatePosition()
         msg.linear.x = v
         msg.angular.z = w
         self.pubVel.publish(msg)
 
     def calculatePosition(self):
+        print('Calculando posicion segun ARtag')
         msj = Twist()
         x_calc = self.landmarks[self.tagNumber][0]-self.depth*numpy.cos(self.theta)
         y_calc = self.landmarks[self.tagNumber][1]-self.depth*numpy.sin(self.theta)
@@ -140,12 +143,15 @@ class MoveLeo(object):
 
     def setDetectStationCallback(self, param):
 
-        msn=param.msn[1:-1]
+        msn=param.data
+        print(param.data)
         msn=msn.split(',')
+        print(msn)
         Bandera=int(msn[0])
 
-        if Bandera ==1:
+        if Bandera == 1:
             self.detectStation = True
+            print('Detecto Estacion')
         else:
             self.detectStation = False
 
@@ -163,6 +169,7 @@ class MoveLeo(object):
 
         self.depth=float(msn[3])
         self.tagNumber = int(msn[4])
+            
         #CoorMsgAA = [detectamos,rango,direccion 1 iz 2 der 3 cen,profundidad,tag ]
         #Completar
 
@@ -225,7 +232,7 @@ class MoveLeo(object):
                             self.pubVel.publish(msg)
    
                         while (self.detectStation is True):
-                           pointStation()
+                           self.pointStation()
                         
                         self.girar(alpha)
                         print('Girando --- x: {} y: {} rho: {} theta: {} alpha: {}\r'.format(self.x,self.y,round(rho,3),round(self.theta,3),round(alpha,3)))
@@ -260,7 +267,7 @@ class MoveLeo(object):
                             self.pubVel.publish(msg)
 
                         while (self.detectStation is True):
-                            pointStation()
+                            self.pointStation()
 
                         # print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
                         print('Avanzando ---  rho: {} theta: {} alpha: {}\r'.format(round(rho,3),round(self.theta,3),round(alpha,3)))
