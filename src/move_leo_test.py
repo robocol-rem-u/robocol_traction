@@ -20,7 +20,17 @@ class MoveLeo(object):
         self.hayRuta = False
         self.detectStation = False
         self.stationCentered = False
-        self.ruta = []
+        self.ruta = [[ 2.1105528 ,14.0      ],
+ [ 2.1105528  ,7.0      ],
+ [ 2.5125628 , 7.0       ],
+ [ 2.5125628  ,6.8      ],
+ [ 2.7135677 , 6.8      ],
+ [ 2.7135677  ,6.2      ],
+ [ 3.115578   ,6.2      ],
+ [ 3.115578   ,3.4      ],
+ [14.572865   ,3.4      ]]
+        self.timeout = True
+        self.timeElapsed = 0
         self.landmarks= [[7.31, 0], [7.19,7.55], [18.85,-3.59], [33.77,6.41], [13.22,-13.61],[21.01,13.21],[20.96,3.36], [20.40, -19.41], [14.77,6.89],[22.46,-10.36], [31.56, -18.81], [29.92,11.44], [32.79,-6.79], [2.04,-12.02], [7.63,13.24]]
         #rospy.Subscriber('/robocol/ruta', Float32MultiArray, self.setRutaCallback)
         self.x,self.y,self.theta = 0.0,0.0,0.0
@@ -108,6 +118,14 @@ class MoveLeo(object):
         msg.angular.z = w
         self.pubVel.publish(msg)
 
+
+    def getTimeElapsed(self):
+        countdown = 10.0
+        now = time.time() - self.timeElapsed
+        if now < countdown:
+            self.timeout = True
+
+
     def calculatePosition(self):
         print('Calculando posicion segun ARtag')
         msj = Twist()
@@ -151,6 +169,7 @@ class MoveLeo(object):
 
         if Bandera == 1:
             self.detectStation = True
+            self.timeout = False
             print('Detecto Estacion')
         else:
             self.detectStation = False
@@ -230,10 +249,16 @@ class MoveLeo(object):
                             msg.linear.x = 0.0
                             msg.angular.z = 0.0
                             self.pubVel.publish(msg)
-   
-                        while (self.detectStation is True):
-                           self.pointStation()
-                        
+
+                        n=0
+
+                        while (self.detectStation is True) :
+                            self.pointStation()
+                            n+=1
+                            if n>1000:
+                                break
+
+
                         self.girar(alpha)
                         print('Girando --- x: {} y: {} rho: {} theta: {} alpha: {}\r'.format(self.x,self.y,round(rho,3),round(self.theta,3),round(alpha,3)))
                         # print('a: ',alpha,'t: ',self.theta,'ang: ',angulo)
@@ -266,8 +291,13 @@ class MoveLeo(object):
                             msg.angular.z = 0.0
                             self.pubVel.publish(msg)
 
-                        while (self.detectStation is True):
+                        n=0
+
+                        while (self.detectStation is True) :
                             self.pointStation()
+                            n+=1
+                            if n>1000:
+                                break
 
                         # print(' rho:',rho,' angle: ', angulo,' theta: ', self.theta,' alpha: ', alpha)
                         print('Avanzando ---  rho: {} theta: {} alpha: {}\r'.format(round(rho,3),round(self.theta,3),round(alpha,3)))
@@ -335,6 +365,7 @@ def callbackPrueba(param):
     print('  Desea aceptar la ruta? (s/n)')
     # try:
     inp = str(raw_input('  > '))
+    inp = 's'
     if inp == 's':
         print('Intentando aceptar ruta...')
         moveLeo.empezarRuta(ruta)
