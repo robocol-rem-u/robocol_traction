@@ -113,6 +113,7 @@ class Ruta:
         
         # self.pub = rospy.Publisher('mytopic', numpy_nd_msg(Float32MultiArray))
         # Subscribers
+        print('Subscribing in /robocol/inicio_destino (Float32MultiArray)')
         rospy.Subscriber('/robocol/inicio_destino', Float32MultiArray, self.callbackPath)
 
     def euclidiana(self, nodo):
@@ -523,7 +524,7 @@ class Ruta:
     def callbackPath(self, param):
         #print('aaaa')
         self.points = param.data
-        #print('callbackPath')
+        print('callbackPath')
         self.callback = True
         # self.navegacion()
             

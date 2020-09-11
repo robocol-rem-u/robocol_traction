@@ -49,7 +49,7 @@ class Sim_Pose(object):
 		odom_msg.pose.pose.orientation.x = param.pose[link_num].orientation.x
 		odom_msg.pose.pose.orientation.w = param.pose[link_num].orientation.w
 		# Mix odoms
-		odom_msg = self.mix_gazebo_n_wheel_odom(odom_msg)
+		# odom_msg = self.mix_gazebo_n_wheel_odom(odom_msg)
 		self.pub_odom.publish(odom_msg)
 		# Print rounded information on screen.
 		link = param.name[link_num]
